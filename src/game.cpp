@@ -44,6 +44,8 @@ void Game::draw()
 
 void Game::eventLoop()
 {
+  printf("Running game with target frame rate of %d\n\n", kTargetFramesPerSecond);
+
   //Here is where we'll handle events, timers (and their callbacks >.>)
   //Also we'll handle update and draw (in that order)
   //Also, I'll be using SDL2 from the start as I have a little bit of experience with it already
@@ -51,7 +53,7 @@ void Game::eventLoop()
   SDL_Event event;
   while(running)
   {
-    const int startTimeMs = SDL_GetTicks();
+    const float startTimeMs = SDL_GetTicks();
     while(SDL_PollEvent(&event))
     {
       switch(event.type)
@@ -68,11 +70,15 @@ void Game::eventLoop()
     draw();
 
     //This is for compensation
-    const int elapsedTime = SDL_GetTicks() - startTimeMs;
+    const float elapsedTime = SDL_GetTicks() - startTimeMs;
     //Ensures our loop only happens 60 times per second.
     // 1 / 60 seconds
     // 1000 / 60 ms
     //SDL_Delay takes ms
-    SDL_Delay(1000 / kTargetFramesPerSecond - elapsedTime);
+    const float deltaTime = (SDL_GetTicks() - startTimeMs);
+    SDL_Delay((1000/kTargetFramesPerSecond) - deltaTime);
+    const float secondsPerFrame = deltaTime / 1000.0;
+    const float fps = 1.0 / (secondsPerFrame);
+    printf("fps: %f\n", fps);
   }
 }
