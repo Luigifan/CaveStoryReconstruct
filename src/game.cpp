@@ -1,30 +1,21 @@
 #include "game.h"
 
 #include <stdlib.h>
+#include "graphics.h"
 #include <SDL2/SDL.h> //i hope
 
 namespace { //idk what this is
-  const int kScreenWidth = 640;
-  const int kScreenHeight = 480;
-  const int kBitsPerPixel = 32;
   const int kTargetFramesPerSecond = 60;
 }
 
 Game::Game()
 {
   SDL_Init(SDL_INIT_EVERYTHING);
-  SDL_ShowCursor(SDL_DISABLE);
-  sdlScreen = SDL_CreateWindow("yeet",
-    SDL_WINDOWPOS_UNDEFINED,
-    SDL_WINDOWPOS_UNDEFINED,
-    kScreenWidth,
-    kScreenHeight,
-    SDL_WINDOW_SHOWN);
+  //SDL_ShowCursor(SDL_DISABLE);
 }
 
 Game::~Game()
 {
-  SDL_DestroyWindow(sdlScreen);
   SDL_Quit();
 }
 
@@ -34,14 +25,10 @@ void Game::runEventLoop()
 }
 
 void Game::update()
-{
-
-}
+{}
 
 void Game::draw()
-{
-
-}
+{}
 
 void Game::eventLoop()
 {
@@ -52,6 +39,7 @@ void Game::eventLoop()
   //Also, I'll be using SDL2 from the start as I have a little bit of experience with it already
   bool running = true;
   SDL_Event event;
+  Graphics graphics; //when this loop exits, this will be deconstructed
   while(running)
   {
     const int startTimeMs = SDL_GetTicks();
