@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include <stdlib.h>
 #include <SDL2/SDL.h> //i hope
 
 namespace { //idk what this is
@@ -53,7 +54,7 @@ void Game::eventLoop()
   SDL_Event event;
   while(running)
   {
-    const float startTimeMs = SDL_GetTicks();
+    const int startTimeMs = SDL_GetTicks();
     while(SDL_PollEvent(&event))
     {
       switch(event.type)
@@ -69,16 +70,10 @@ void Game::eventLoop()
     update();
     draw();
 
-    //This is for compensation
-    const float elapsedTime = SDL_GetTicks() - startTimeMs;
-    //Ensures our loop only happens 60 times per second.
-    // 1 / 60 seconds
-    // 1000 / 60 ms
-    //SDL_Delay takes ms
-    const float deltaTime = (SDL_GetTicks() - startTimeMs);
-    SDL_Delay((1000/kTargetFramesPerSecond) - deltaTime);
-    const float secondsPerFrame = deltaTime / 1000.0;
-    const float fps = 1.0 / (secondsPerFrame);
-    printf("fps: %f\n", fps);
+    const int endTimeMs = SDL_GetTicks();
+    const int elapsedTime = endTimeMs - startTimeMs; //ms it took
+    const int delayTimeToMaintainFPS = 1000 / kTargetFramesPerSecond;
+    SDL_Delay(delayTimeToMaintainFPS);
+    //printf("fps: %f\n", 1.0f / (delayTimeToMaintainFPS / 1000.0f));
   }
 }
