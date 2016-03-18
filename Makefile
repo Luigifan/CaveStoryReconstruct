@@ -1,6 +1,6 @@
 compile:
-	clang++ -o gen/cavestory src/**.cpp -lSDL2
+	clang++ -std=c++11 -stdlib=libc++ -o gen/cavestory src/**.cpp -lSDL2 -lSDL2_image
 compile-osx:
-	clang++ -o gen/cavestory src/**.cpp -L/usr/local/Cellar/sdl2/2.0.4/lib
+	clang++ -std=c++11 -o gen/cavestory src/**.cpp -L/usr/local/Cellar/sdl2/2.0.4/lib
 run:
 	gen/cavestory

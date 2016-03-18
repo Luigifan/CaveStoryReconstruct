@@ -1,8 +1,9 @@
 #include "game.h"
 
 #include <stdlib.h>
+#include <SDL2/SDL.h>
 #include "graphics.h"
-#include <SDL2/SDL.h> //i hope
+#include "sprite.h"
 
 namespace { //idk what this is
   const int kTargetFramesPerSecond = 60;
@@ -27,8 +28,10 @@ void Game::runEventLoop()
 void Game::update()
 {}
 
-void Game::draw()
-{}
+void Game::draw(Graphics& graphics)
+{
+  sprite_->draw(graphics, 320, 240);
+}
 
 void Game::eventLoop()
 {
@@ -40,6 +43,7 @@ void Game::eventLoop()
   bool running = true;
   SDL_Event event;
   Graphics graphics; //when this loop exits, this will be deconstructed
+  sprite_.reset(graphics.createSprite("/content/MyChar.bmp", 0, 0, 32, 32)); //path, x, y, w, h
   while(running)
   {
     const int startTimeMs = SDL_GetTicks();
@@ -56,7 +60,9 @@ void Game::eventLoop()
       }
     }
     update();
-    draw();
+    graphics.clear();
+    draw(graphics);
+    graphics.flip();
 
     const int endTimeMs = SDL_GetTicks();
     const int elapsedTime = endTimeMs - startTimeMs; //ms it took
@@ -64,4 +70,5 @@ void Game::eventLoop()
     SDL_Delay(delayTimeToMaintainFPS);
     //printf("fps: %f\n", 1.0f / (delayTimeToMaintainFPS / 1000.0f));
   }
+  SDL_Quit();
 }
