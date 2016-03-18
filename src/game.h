@@ -4,17 +4,19 @@
 #include <memory> //fuck boost
 
 struct Sprite;
+struct AnimatedSprite;
 struct Graphics;
 struct Game
 {
   Game();
   ~Game();
+  static int kTileSize;
   void runEventLoop();
 private:
   void eventLoop();
-  void update();
+  void update(int elapsed_time_ms);
   void draw(Graphics& graphics);
-  std::unique_ptr<Sprite> sprite_;
+  std::unique_ptr<AnimatedSprite> sprite_;
 };
 
 #endif //GAME_H_

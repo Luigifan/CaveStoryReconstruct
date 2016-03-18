@@ -4,10 +4,12 @@
 #include <SDL2/SDL.h>
 #include "graphics.h"
 #include "sprite.h"
+#include "animated_sprite.h"
 
 namespace { //idk what this is
   const int kTargetFramesPerSecond = 60;
 }
+int Game::kTileSize = 32;
 
 Game::Game()
 {
@@ -25,8 +27,10 @@ void Game::runEventLoop()
   this->eventLoop();
 }
 
-void Game::update()
-{}
+void Game::update(int elapsed_time_ms)
+{
+  sprite_->update(elapsed_time_ms);
+}
 
 void Game::draw(Graphics& graphics)
 {
@@ -43,7 +47,9 @@ void Game::eventLoop()
   bool running = true;
   SDL_Event event;
   Graphics graphics; //when this loop exits, this will be deconstructed
-  sprite_.reset(graphics.createSprite("/content/MyChar.bmp", 0, 0, 32, 32)); //path, x, y, w, h
+  sprite_.reset(graphics.createAnimatedSprite("/content/MyChar.bmp", 0, 0, kTileSize, kTileSize, 15, 3)); //path, x, y, w, h
+
+  int last_update_time = SDL_GetTicks();
   while(running)
   {
     const int startTimeMs = SDL_GetTicks();
@@ -59,7 +65,11 @@ void Game::eventLoop()
             break;
       }
     }
-    update();
+
+    const int current_time_ms = SDL_GetTicks();
+    update(current_time_ms - last_update_time);
+    last_update_time = current_time_ms;
+
     graphics.clear();
     draw(graphics);
     graphics.flip();

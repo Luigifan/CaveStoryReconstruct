@@ -1,5 +1,6 @@
 #include "graphics.h"
 #include "sprite.h"
+#include "animated_sprite.h"
 
 #include <iostream>
 #include <SDL2/SDL.h>
@@ -31,6 +32,11 @@ Graphics::~Graphics()
 Sprite* Graphics::createSprite(const std::string& path, int source_x, int source_y, int width, int height)
 {
 	return new Sprite(renderer, path, source_x, source_y, width, height);
+}
+
+AnimatedSprite* Graphics::createAnimatedSprite(const std::string& path, int source_x, int source_y, int width, int height, int fps, int frame_count)
+{
+	return new AnimatedSprite(renderer, path, source_x, source_y, width, height, fps, frame_count);
 }
 
 void Graphics::clear()
