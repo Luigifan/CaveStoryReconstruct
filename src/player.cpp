@@ -88,7 +88,7 @@ void Player::update(int elapsed_time_ms)
   {
     velocity_x_ = std::min(velocity_x_, kMaxSpeedX);
   }
-  else //not moving
+  else if(onGround())//not moving
   {
     velocity_x_ *= kSlowdownFactor;
   }
