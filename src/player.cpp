@@ -70,13 +70,13 @@ void Player::initializeSprites(Graphics& graphics)
       // for every vertical facing
   // a lot of spritestates but hey
       // call initialize sprite for all of these with SpriteState
-  for(MotionType _motion = FIRST_MOTION_TYPE ; _motion < LAST_MOTION_TYPE; _motion++)
+  for(int _motion = FIRST_MOTION_TYPE ; _motion < LAST_MOTION_TYPE; _motion++)
   {
-    for(HorizontalFacing _hface = FIRST_HORIZONTAL_FACING; _hface < LAST_HORIZONTAL_FACING; _hface++)
+    for(int _hface = FIRST_HORIZONTAL_FACING; _hface < LAST_HORIZONTAL_FACING; _hface++)
     {
-      for(VerticalFacing _vface = FIRST_VERTICAL_FACING; _vface < LAST_VERTICAL_FACING; _vface++)
+      for(int _vface = FIRST_VERTICAL_FACING; _vface < LAST_VERTICAL_FACING; _vface++)
       {
-        initializeSprite(graphics, SpriteState(_motion, _hface, _vface));
+        initializeSprite(graphics, SpriteState((MotionType)_motion, (HorizontalFacing)_hface, (VerticalFacing)_vface));
       }
     }
   }
@@ -87,7 +87,7 @@ void Player::initializeSprite(Graphics& graphics, const SpriteState& sprite)
   int source_x, source_y;
   // source_y will be..
     // frame * kTileSize 0 if going left
-    // ((frame+ 1) * kTileSize) otherwise 
+    // ((frame+ 1) * kTileSize) otherwise
   source_y = sprite.horizontal_facing == LEFT ? kCharacterFrame * Game::kTileSize : (1 + kCharacterFrame) * Game::kTileSize;
   //depends on vertical facing or horizontal motion type :////
   switch(sprite.motion_type)

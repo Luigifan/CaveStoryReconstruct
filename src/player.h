@@ -24,20 +24,20 @@ struct Player
   void startJump();
   void stopJump();
 private:
-  enum MotionType{
-    FIRST_MOTION_TYPE,
-    STANDING = FIRST_MOTION_TYPE, WALKING, JUMPING, FALLING, 
-    LAST_MOTION_TYPE
+  enum MotionType : int{
+    FIRST_MOTION_TYPE = 0,
+    STANDING = 0, WALKING = 1, JUMPING = 2, FALLING = 3,
+    LAST_MOTION_TYPE = 4
   };
   enum HorizontalFacing {
-    FIRST_HORIZONTAL_FACING,
-    LEFT = FIRST_HORIZONTAL_FACING, RIGHT,
-    LAST_HORIZONTAL_FACING
+    FIRST_HORIZONTAL_FACING = 0,
+    LEFT = 0, RIGHT = 1,
+    LAST_HORIZONTAL_FACING = 2
   };
   enum VerticalFacing{
-    FIRST_VERTICAL_FACING,
-    UP = FIRST_VERTICAL_FACING, DOWN, HORIZONTAL,
-    LAST_VERTICAL_FACING
+    FIRST_VERTICAL_FACING = 0,
+    UP = 0, DOWN = 1, HORIZONTAL = 2,
+    LAST_VERTICAL_FACING = 3
   };
   struct SpriteState {
     SpriteState(MotionType type = STANDING, HorizontalFacing facing = LEFT, VerticalFacing vfacing = HORIZONTAL)
