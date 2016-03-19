@@ -17,23 +17,38 @@ struct Player
   void startMovingRight();
   void stopMoving();
 
+  void lookUp();
+  void lookDown();
+  void lookHorizontal();
+
   void startJump();
   void stopJump();
 private:
   enum MotionType{
-    STANDING, WALKING
+    FIRST_MOTION_TYPE,
+    STANDING = FIRST_MOTION_TYPE, WALKING, JUMPING, FALLING, 
+    LAST_MOTION_TYPE
   };
   enum HorizontalFacing {
-    LEFT, RIGHT
+    FIRST_HORIZONTAL_FACING,
+    LEFT = FIRST_HORIZONTAL_FACING, RIGHT,
+    LAST_HORIZONTAL_FACING
+  };
+  enum VerticalFacing{
+    FIRST_VERTICAL_FACING,
+    UP = FIRST_VERTICAL_FACING, DOWN, HORIZONTAL,
+    LAST_VERTICAL_FACING
   };
   struct SpriteState {
-    SpriteState(MotionType type = STANDING, HorizontalFacing facing = LEFT)
+    SpriteState(MotionType type = STANDING, HorizontalFacing facing = LEFT, VerticalFacing vfacing = HORIZONTAL)
     {
       motion_type = type;
       horizontal_facing = facing;
+      vertical_facing = vfacing;
     }
     MotionType motion_type;
     HorizontalFacing horizontal_facing;
+    VerticalFacing vertical_facing;
   };
   struct Jump {
     Jump()
@@ -60,6 +75,7 @@ private:
   //friend because SpriteState is a private friend class of player
   friend bool operator<(const SpriteState& a, const SpriteState& b);
   void initializeSprites(Graphics& graphics);
+  void initializeSprite(Graphics& graphics, const SpriteState& sprite);
   SpriteState getSpriteState();
 
   bool onGround() const {return on_ground_;}
@@ -71,6 +87,7 @@ private:
   Jump jump_;
 
   HorizontalFacing horizontal_facing_;
+  VerticalFacing vertical_facing_;
 
   std::map<SpriteState, std::unique_ptr<Sprite>> sprites_;
 };

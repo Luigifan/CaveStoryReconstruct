@@ -13,7 +13,7 @@ namespace {
 
 Graphics::Graphics()
 {
-	sdlWindow = SDL_CreateWindow("yeet",
+	sdlWindow = SDL_CreateWindow(NULL,
     	SDL_WINDOWPOS_UNDEFINED,
     	SDL_WINDOWPOS_UNDEFINED,
     	kScreenWidth,

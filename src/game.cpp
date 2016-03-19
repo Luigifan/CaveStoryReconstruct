@@ -94,6 +94,24 @@ void Game::eventLoop()
     else
       player_->stopMoving();
 
+    //looking logic, probably going to split this off into a seperate method later because this is getting messy
+    if((input.isKeyHeld(SDLK_UP)) && (input.isKeyHeld(SDLK_DOWN)))
+    {
+      player_->lookHorizontal();
+    }
+    else if(input.isKeyHeld(SDLK_UP))
+    {
+      player_->lookUp();
+    }
+    else if(input.isKeyHeld(SDLK_DOWN))
+    {
+      player_->lookDown();
+    }
+    else
+    {
+      player_->lookHorizontal();
+    }
+
     // player jump logic
     if(input.wasKeyPressed(SDLK_z))
     {
