@@ -96,10 +96,8 @@ void Player::update(int elapsed_time_ms)
   y_ += round(velocity_y_ * elapsed_time_ms); //rounding in draw, might have to put it here
   if(jump_.active() == false)
   {
-    //velocity_y_ += std::min(velocity_y_ + kGravity * elapsed_time_ms,
-      //kMaxSpeedY);
-      //velocity_y_ += std::min((velocity_y_ + kGravity) * elapsed_time_ms, kMaxSpeedY);
-      velocity_y_ += kGravity * elapsed_time_ms;
+    velocity_y_ = std::min(velocity_y_ + (kGravity * elapsed_time_ms),
+      kMaxSpeedY);
   }
 
   //TODO: proper detection
