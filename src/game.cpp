@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include "graphics.h"
-#include "sprite.h"
-#include "animated_sprite.h"
+#include "player.h"
+#include "input.h"
 
 namespace { //idk what this is
   const int kTargetFramesPerSecond = 60;
@@ -29,12 +29,12 @@ void Game::runEventLoop()
 
 void Game::update(int elapsed_time_ms)
 {
-  sprite_->update(elapsed_time_ms);
+  player_->update(elapsed_time_ms);
 }
 
 void Game::draw(Graphics& graphics)
 {
-  sprite_->draw(graphics, 320, 240);
+  player_->draw(graphics);
 }
 
 void Game::eventLoop()
@@ -47,24 +47,51 @@ void Game::eventLoop()
   bool running = true;
   SDL_Event event;
   Graphics graphics; //when this loop exits, this will be deconstructed
-  sprite_.reset(graphics.createAnimatedSprite("/content/MyChar.bmp", 0, 0, kTileSize, kTileSize, 15, 3)); //path, x, y, w, h
+  Input input;
+  player_.reset(new Player(graphics, 320, 240));
 
   int last_update_time = SDL_GetTicks();
   while(running)
   {
     const int startTimeMs = SDL_GetTicks();
+    input.beginNewFrame();
     while(SDL_PollEvent(&event))
     {
       switch(event.type)
       {
         case SDL_KEYDOWN:
-          if(event.key.keysym.sym == SDLK_ESCAPE)
-          {running = false;} //breaks out of our event loop
+          input.keyDownEvent(event);
+          break;
+        case SDL_KEYUP:
+          input.keyUpEvent(event);
           break;
         default:
             break;
       }
     }
+
+    if(input.wasKeyPressed(SDLK_ESCAPE))
+    {running = false;}
+    // if both left and right pressed, stop moving
+    // left = move left
+    // right = move right
+    // else, stop moving all together
+
+    if((input.isKeyHeld(SDLK_LEFT)) && (input.isKeyHeld(SDLK_RIGHT)))
+    {
+      player_->stopMoving();
+    }
+    else if(input.isKeyHeld(SDLK_LEFT))
+    {
+      player_->startMovingLeft();
+    }
+    else if(input.isKeyHeld(SDLK_RIGHT))
+    {
+      player_->startMovingRight();
+    }
+    else
+      player_->stopMoving();
+
 
     const int current_time_ms = SDL_GetTicks();
     update(current_time_ms - last_update_time);

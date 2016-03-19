@@ -3,9 +3,10 @@
 
 #include <memory> //fuck boost
 
-struct Sprite;
+struct Player;
 struct AnimatedSprite;
 struct Graphics;
+
 struct Game
 {
   Game();
@@ -16,7 +17,7 @@ private:
   void eventLoop();
   void update(int elapsed_time_ms);
   void draw(Graphics& graphics);
-  std::unique_ptr<AnimatedSprite> sprite_;
+  std::unique_ptr<Player> player_;
 };
 
 #endif //GAME_H_
