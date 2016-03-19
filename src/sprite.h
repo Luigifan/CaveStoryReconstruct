@@ -9,8 +9,7 @@ struct Graphics;
 struct Sprite
 {
 	//Sprite(const std::string& file_path, int source_x, int source_y, int width, int height);
-	Sprite(SDL_Renderer* graphics, const std::string& file_path, int source_x, int source_y, int width, int height);
-	virtual ~Sprite(); //virtual destructor because base classes require this (C++ rules)
+	Sprite(Graphics& graphics, const std::string& file_path, int source_x, int source_y, int width, int height);
 
 	virtual void update(int /*elapsed time in ms*/){} //leave empty for later mostly for classes that extend sprite
 	void draw(Graphics& graphics, int x, int y);
@@ -20,5 +19,5 @@ private:
 	SDL_Texture* sprite_sheet_;
 };
 
-#endif 
+#endif
 //SPRITE_H_

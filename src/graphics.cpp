@@ -25,18 +25,36 @@ Graphics::Graphics()
 }
 Graphics::~Graphics()
 {
+	for(SpriteMap::iterator iter = sprite_sheets_.begin(); iter != sprite_sheets_.end(); iter++)
+	{
+		//it's a pair
+		//first would be the string (name)
+		SDL_DestroyTexture(iter->second); //second is the value
+	}
 	SDL_DestroyWindow(sdlWindow);
 	SDL_DestroyRenderer(renderer);
+
 }
 
-Sprite* Graphics::createSprite(const std::string& path, int source_x, int source_y, int width, int height)
+Graphics::TextureID Graphics::loadImage(const std::string& file_path)
 {
-	return new Sprite(renderer, path, source_x, source_y, width, height);
-}
+	if(sprite_sheets_.count(file_path) == 0) //doesn't exist, need to actually load
+	{
+		//here we load
+		SDL_Surface* surf = SDL_LoadBMP(file_path.c_str());
+		if(surf == nullptr)
+		{
+			std::cerr << "Couldn't load texture: " << SDL_GetError() << std::endl;
+		}
+		else
+		{
+			sprite_sheets_[file_path] = SDL_CreateTextureFromSurface(renderer, surf);
+		}
+		if(surf != nullptr)
+			SDL_FreeSurface(surf);
+	}
 
-AnimatedSprite* Graphics::createAnimatedSprite(const std::string& path, int source_x, int source_y, int width, int height, int fps, int frame_count)
-{
-	return new AnimatedSprite(renderer, path, source_x, source_y, width, height, fps, frame_count);
+	return sprite_sheets_[file_path];
 }
 
 void Graphics::clear()
@@ -47,24 +65,10 @@ void Graphics::flip()
 {
 	SDL_RenderPresent(renderer);
 }
-void Graphics::drawToScreen(SDL_Texture* source, SDL_Rect* source_rectangle, SDL_Rect* destination_rectangle)
+void Graphics::drawToScreen(TextureID source, SDL_Rect* source_rectangle, SDL_Rect* destination_rectangle)
 {
 	if(SDL_RenderCopy(renderer, source, source_rectangle, destination_rectangle) != 0)
 	{
 		std::cerr << "Error: " << SDL_GetError() << std::endl;
 	}
-}
-void Graphics::drawToScreen(SDL_Surface* source, SDL_Rect* source_rectangle, SDL_Rect* destination_rectangle)
-{
-	SDL_Texture* converted = SDL_CreateTextureFromSurface(renderer, source);
-	if(converted == nullptr)
-	{
-		std::cerr << "Error: " << SDL_GetError() << std::endl;
-	}
-	int res = SDL_RenderCopy(renderer, converted, source_rectangle, destination_rectangle);
-	if(res != 0)
-	{
-		std::cerr << "Error: " << SDL_GetError() << std::endl;
-	}
-	SDL_DestroyTexture(converted);
 }

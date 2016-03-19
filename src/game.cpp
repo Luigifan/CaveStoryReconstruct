@@ -7,7 +7,7 @@
 #include "input.h"
 
 namespace { //idk what this is
-  const int kTargetFramesPerSecond = 60;
+  const int kTargetFramesPerSecond = 120;
 }
 int Game::kTileSize = 32;
 
