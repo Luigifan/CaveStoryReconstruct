@@ -7,7 +7,11 @@
 namespace {
   const float kWalkingAcceleration = 0.0012f; // (pixels / ms) / ms
   const float kMaxSpeedX = 0.325f; // pixels / ms
+  const float kMaxSpeedY = 0.325f;
   const float kSlowdownFactor = 0.8f;
+  const float kJumpSpeed = 0.325f; // temp pixels / ms
+  const float kGravity = 0.0012f;
+  const int kJumpTime = 275; // ms
 }
 
 bool operator<(const Player::SpriteState& a, const Player::SpriteState& b)
@@ -31,7 +35,10 @@ Player::Player(Graphics& graphics, float x, float y)
   y_ = y;
 
   velocity_x_ = 0.0f;
+  velocity_y_ = 0.0f;
   acceleration_x_ = 0.0f;
+
+  on_ground_ = false;
 
   horizontal_facing_ = RIGHT;
 
@@ -68,6 +75,7 @@ Player::SpriteState Player::getSpriteState()
 void Player::update(int elapsed_time_ms)
 {
   sprites_[getSpriteState()]->update(elapsed_time_ms);
+  jump_.update(elapsed_time_ms);
 
   x_ += round(velocity_x_ * elapsed_time_ms);
   velocity_x_ += acceleration_x_ * elapsed_time_ms;
@@ -84,6 +92,23 @@ void Player::update(int elapsed_time_ms)
   {
     velocity_x_ *= kSlowdownFactor;
   }
+
+  y_ += round(velocity_y_ * elapsed_time_ms); //rounding in draw, might have to put it here
+  if(jump_.active() == false)
+  {
+    //velocity_y_ += std::min(velocity_y_ + kGravity * elapsed_time_ms,
+      //kMaxSpeedY);
+      //velocity_y_ += std::min((velocity_y_ + kGravity) * elapsed_time_ms, kMaxSpeedY);
+      velocity_y_ += kGravity * elapsed_time_ms;
+  }
+
+  //TODO: proper detection
+  if(y_ >= 320)
+  {
+    y_ = 320;
+    velocity_y_ = 0.0f;
+  }
+  on_ground_ = y_ == 320;
 }
 
 void Player::draw(Graphics& graphics)
@@ -107,3 +132,46 @@ void Player::stopMoving()
 {
   acceleration_x_ = 0.0f; //no acceleration for velocity slowdown
 }
+
+void Player::startJump()
+{
+  if(onGround()) // if we're on the ground: reset jump and give an initial velocity up
+  {
+    jump_.reset();
+    velocity_y_ = -kJumpSpeed;
+  }
+  else if(velocity_y_ < 0.0f) //bc negative y = go up
+  { // else, mid jump so re-activate anti gravity (non-Mario like)
+    jump_.reactivate();
+  }
+}
+
+void Player::stopJump()
+{
+  // let go of key, deactivate jump
+  jump_.deactivate();
+}
+
+/**
+Begin jump struct external implementations
+*/
+void Player::Jump::reset()
+{
+  time_remaining_ms_ = kJumpTime;
+  reactivate();
+}
+
+void Player::Jump::update(int elapsed_time_ms)
+{
+  if(active_)
+  {
+    time_remaining_ms_ -= elapsed_time_ms;
+    if(time_remaining_ms_ <= 0)
+    {
+      active_ = false;
+    }
+  }
+}
+/**
+End jump struct external implementations
+*/

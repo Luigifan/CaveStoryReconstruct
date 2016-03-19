@@ -78,7 +78,7 @@ void Game::eventLoop()
     // left = move left
     // right = move right
     // else, stop moving all together
-
+    // Walking logic
     if((input.isKeyHeld(SDLK_LEFT)) && (input.isKeyHeld(SDLK_RIGHT)))
     {
       player_->stopMoving();
@@ -93,6 +93,16 @@ void Game::eventLoop()
     }
     else
       player_->stopMoving();
+
+    // player jump logic
+    if(input.wasKeyPressed(SDLK_z))
+    {
+      player_->startJump();
+    }
+    else if(input.wasKeyReleased(SDLK_z))
+    {
+      player_->stopJump();
+    }
 
 
     const int current_time_ms = SDL_GetTicks();
