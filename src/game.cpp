@@ -34,7 +34,9 @@ void Game::update(int elapsed_time_ms)
 
 void Game::draw(Graphics& graphics)
 {
+  graphics.clear();
   player_->draw(graphics);
+  graphics.flip();
 }
 
 void Game::eventLoop()
@@ -97,9 +99,7 @@ void Game::eventLoop()
     update(current_time_ms - last_update_time);
     last_update_time = current_time_ms;
 
-    graphics.clear();
     draw(graphics);
-    graphics.flip();
 
     const int endTimeMs = SDL_GetTicks();
     const int elapsedTime = endTimeMs - startTimeMs; //ms it took
