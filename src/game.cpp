@@ -129,10 +129,18 @@ void Game::eventLoop()
 
     draw(graphics);
 
-    const int endTimeMs = SDL_GetTicks();
+    const int ms_per_frame = 1000 / kTargetFramesPerSecond;
+    const int elapsed_time_ms = SDL_GetTicks() - startTimeMs;
+
+    if(elapsed_time_ms < ms_per_frame)
+    {
+      SDL_Delay(ms_per_frame - elapsed_time_ms);
+    }
+
+    /*const int endTimeMs = SDL_GetTicks();
     const int elapsedTime = endTimeMs - startTimeMs; //ms it took
     const int delayTimeToMaintainFPS = 1000 / kTargetFramesPerSecond;
-    SDL_Delay(delayTimeToMaintainFPS);
+    SDL_Delay(delayTimeToMaintainFPS - elapsedTime);*/
     //printf("fps: %f\n", 1.0f / (delayTimeToMaintainFPS / 1000.0f));
   }
   SDL_Quit();
