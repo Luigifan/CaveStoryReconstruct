@@ -1,8 +1,10 @@
 #include "player.h"
 #include "graphics.h"
 #include "game.h"
+#include "map.h"
 
 #include <cmath> //yeet
+#include <cassert>
 
 namespace {
   const float kWalkingAcceleration = 0.0012f; // (pixels / ms) / ms
@@ -15,7 +17,7 @@ namespace {
   const int kJumpTime = 275; // ms
   const int kJumpFrame = 1; //frame index for the jump frame
   const int kFallFrame = 2; //frame index for the fall frame
-  const int kCharacterFrame = 0; //increase for various other styled quotes :)
+  const int kCharacterFrame = 4; //increase for various other styled quotes :) 0 is default quote
   const int kWalkFrame = 0; //frame index for the walk frame
   const int kStandFrame = 0; //frame index for standing frame
   const int kUpFrameOffset = 3; //index offset for if we're looking up
@@ -25,6 +27,9 @@ namespace {
   const int kNumFramesWalk = 3; //the number of frames in the walking animation
 
   const std::string kSpriteFilePath = "content/MyChar.bmp";
+
+  const Rectangle kCollisionX(6, 10, 20, 12); // x y w h
+  const Rectangle kCollisionY(10, 2, 12, 30);
 }
 
 bool operator<(const Player::SpriteState& a, const Player::SpriteState& b)
@@ -148,7 +153,7 @@ Player::SpriteState Player::getSpriteState()
   return SpriteState(motion, horizontal_facing_, vertical_facing_);
 }
 
-void Player::update(int elapsed_time_ms)
+void Player::update(int elapsed_time_ms, const Map& map)
 {
   sprites_[getSpriteState()]->update(elapsed_time_ms);
   jump_.update(elapsed_time_ms);
@@ -240,6 +245,53 @@ void Player::stopJump()
   // let go of key, deactivate jump
   jump_.deactivate();
 }
+
+Rectangle Player::leftCollision(int delta) const // left x
+{
+  //delta is a prediction of where we're going to go
+
+  //assert is basically a "make sure this is okay if not, abort"
+  assert(delta <= 0); //left collision if delta is negative or 0
+  return Rectangle (
+    x_ + kCollisionX.left() + delta, 
+    y_ + kCollisionX.top(),
+    (kCollisionX.getWidth() / 2) - delta, //lob off half bc we can, taking into account our delta 
+    kCollisionX.getHeight()
+  );
+} 
+
+Rectangle Player::rightCollision(int delta) const // right x
+{
+  assert(delta >= 0);
+  return Rectangle (
+    x_ + kCollisionX.left() + (kCollisionX.getWidth() / 2),
+    y_ + kCollisionX.top(),
+    kCollisionX.getWidth() + (kCollisionX.getWidth() / 2) + delta,
+    kCollisionX.getHeight()
+  );
+}
+
+Rectangle Player::bottomCollision(int delta) const // bottom y
+{
+  assert(delta >= 0);
+  return Rectangle (
+    x_ + kCollisionY.left(),
+    y_ + kCollisionY.top() + (kCollisionY.getHeight() / 2),
+    kCollisionY.getWidth(),
+    kCollisionY.getHeight() + (kCollisionY.getHeight() / 2) + delta
+  );
+} 
+
+Rectangle Player::topCollision(int delta) const // top y
+{
+  assert(delta <= 0);
+  return Rectangle (
+    x_ + kCollisionY.left(), 
+    y_ + kCollisionY.top() + delta,
+    kCollisionY.getWidth(), 
+    (kCollisionY.getHeight() / 2) - delta //lob off half bc we can, taking into account our delta 
+  );
+} 
 
 /**
 Begin jump struct external implementations

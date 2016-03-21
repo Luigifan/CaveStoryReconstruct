@@ -8,7 +8,7 @@
 #include "map.h"
 
 namespace { //idk what this is
-  const int kTargetFramesPerSecond = 120;
+  const int kTargetFramesPerSecond = 60;
 }
 int Game::kTileSize = 32;
 
@@ -30,7 +30,7 @@ void Game::runEventLoop()
 
 void Game::update(int elapsed_time_ms)
 {
-  player_->update(elapsed_time_ms);
+  player_->update(elapsed_time_ms, *map_); //dereference that bitch
   map_->update(elapsed_time_ms);
 }
 

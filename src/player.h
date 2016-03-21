@@ -4,13 +4,17 @@
 #include <memory>
 #include <map>
 #include "animated_sprite.h"
+#include "rectangle.h"
 
 struct Graphics;
+struct Map;
 
 struct Player
 {
   Player(Graphics& graphics, float x, float y);
-  void update(int elapsed_time_ms);
+
+  //Update velocity, calculate delta, check collision, react, repeat.
+  void update(int elapsed_time_ms, const Map& map);
   void draw(Graphics& graphics);
 
   void startMovingLeft();
@@ -77,6 +81,11 @@ private:
   void initializeSprites(Graphics& graphics);
   void initializeSprite(Graphics& graphics, const SpriteState& sprite);
   SpriteState getSpriteState();
+
+  Rectangle leftCollision(int delta) const; // left x
+  Rectangle rightCollision(int delta) const; // right x
+  Rectangle bottomCollision(int delta) const; // bottom y
+  Rectangle topCollision(int delta) const; // top y
 
   bool onGround() const {return on_ground_;}
 
