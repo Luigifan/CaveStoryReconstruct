@@ -30,6 +30,28 @@ namespace {
 
   const Rectangle kCollisionX(6, 10, 20, 12); // x y w h
   const Rectangle kCollisionY(10, 2, 12, 30);
+
+  struct CollisionInfo
+  {
+      bool collided;
+      int row, column;
+  };
+
+  CollisionInfo getWallCollisionInfo(const Map& map, const Rectangle& rectangle)
+  {
+    CollisionInfo info = {false, 0, 0}; //yay C++11
+    auto tiles = map.getCollidingTiles(rectangle);
+    // 5. Loop through checking wall tiles only. Tecccchnically
+    for(size_t i = 0; i < tiles.size(); ++i)
+    {
+      if(tiles[i].tile_type_ == Map::WALL_TILE) //we can break and record that we've collided
+      {
+        info = {true, tiles[i].row, tiles[i].column};
+        break;
+      }
+    }
+    return info;
+  };
 }
 
 bool operator<(const Player::SpriteState& a, const Player::SpriteState& b)
@@ -158,7 +180,13 @@ void Player::update(int elapsed_time_ms, const Map& map)
   sprites_[getSpriteState()]->update(elapsed_time_ms);
   jump_.update(elapsed_time_ms);
 
-  x_ += round(velocity_x_ * elapsed_time_ms);
+  updateX(elapsed_time_ms, map);
+  updateY(elapsed_time_ms, map);
+}
+
+void Player::updateX(int elapsed_time_ms, const Map& map)
+{
+  // 1. Update velocity
   velocity_x_ += acceleration_x_ * elapsed_time_ms;
   if(acceleration_x_ < 0.0f) //moving left
   {
@@ -174,25 +202,134 @@ void Player::update(int elapsed_time_ms, const Map& map)
     velocity_x_ *= kSlowdownFactor;
   }
 
-  y_ += round(velocity_y_ * elapsed_time_ms); //rounding in draw, might have to put it here
+  // 2. Calculate delta x
+  const int delta = round(velocity_x_ * elapsed_time_ms);
+
+  // 3. Check collision in delta direction
+  if(delta > 0)
+  {
+    // 4. Check collision for down direction delta.
+    CollisionInfo info = getWallCollisionInfo(map, rightCollision(delta));
+    // 6. React
+    if(info.collided)
+    {
+      // Alignment and stopping velocity so we don't move anymore.
+      x_ = info.column * Game::kTileSize - kCollisionX.right();
+      velocity_x_ = 0.0f; //so we don't keep moving
+    }
+    else
+    {
+      x_ += delta;
+    }
+
+    //Verify left direction
+    info = {false,0,0};
+    info = getWallCollisionInfo(map, leftCollision(0));
+    if(info.collided)
+    {
+      x_ = info.column * Game::kTileSize + kCollisionX.right();
+    }
+  }
+  else // moving left
+  {
+    // 4. Check collision for down direction delta.
+    CollisionInfo info = getWallCollisionInfo(map, leftCollision(delta));
+    // 6. React
+    if(info.collided)
+    {
+      // Alignment and stopping velocity so we don't move anymore.
+      x_ = info.column * Game::kTileSize + kCollisionX.right();
+      velocity_x_ = 0.0f; //so we don't keep moving
+    }
+    else
+    {
+      x_ += delta;
+    }
+
+    //Verify left direction
+    info = {false,0,0};
+    info = getWallCollisionInfo(map, rightCollision(0));
+    if(info.collided)
+    {
+      x_ = info.column * Game::kTileSize - kCollisionX.right();
+    } 
+  }
+}
+
+void Player::updateY(int elapsed_time_ms, const Map& map)
+{
+  // 1. Update velocity
   if(jump_.active() == false)
   {
     velocity_y_ = std::min(velocity_y_ + (kGravity * elapsed_time_ms),
       kMaxSpeedY);
   }
 
-  //TODO: proper detection
-  if(y_ >= 320)
+  // 2. Calculate delta movement for collision
+  const int delta = round(velocity_y_ * elapsed_time_ms);
+
+  // 3. Check collection for direction of delta (up/down)
+  if(delta > 0) //going down
   {
-    y_ = 320;
-    velocity_y_ = 0.0f;
+    // 4. Check collision for down direction delta.
+    CollisionInfo info = getWallCollisionInfo(map, bottomCollision(delta));
+    // 6. React
+    if(info.collided)
+    {
+      // Alignment and stopping velocity so we don't move anymore.
+      y_ = info.row * Game::kTileSize - kCollisionY.bottom();
+      velocity_y_ = 0.0f;
+      // we could set this to negative to bounce o:
+      on_ground_ = true;
+    }
+    else
+    {
+      y_ += delta;
+      on_ground_ = false;
+    }
+
+    //Verify up direction
+    info = {false,0,0};
+    info = getWallCollisionInfo(map, topCollision(0));
+    if(info.collided)
+    {
+      y_ = info.row * Game::kTileSize + kCollisionY.getHeight();
+      //on_ground_ = true;
+    }
   }
-  on_ground_ = y_ == 320;
+  else //jumping
+  {
+    // 4. Check collision for down direction delta.
+    CollisionInfo info = getWallCollisionInfo(map, topCollision(delta));
+    // 6. React
+    if(info.collided)
+    {
+      // Alignment and stopping velocity so we don't move anymore.
+      y_ = info.row * Game::kTileSize + kCollisionY.getHeight();
+      velocity_y_ = 0.0f;
+      // we could set this to negative to bounce o:
+      on_ground_ = false;
+    }
+    else
+    {
+      y_ += delta;
+      on_ground_ = false;
+    }
+
+    //Verify up direction
+    info = {false,0,0};
+    info = getWallCollisionInfo(map, bottomCollision(0));
+    if(info.collided)
+    {
+      y_ = info.row * Game::kTileSize - kCollisionY.bottom();
+      on_ground_ = true;
+    }
+  }
 }
 
 void Player::draw(Graphics& graphics)
 {
-  sprites_[getSpriteState()]->draw(graphics, round(x_), round(y_));
+  sprites_[getSpriteState()]->draw(graphics, x_, y_);
 }
 
 void Player::startMovingLeft()
@@ -266,7 +403,7 @@ Rectangle Player::rightCollision(int delta) const // right x
   return Rectangle (
     x_ + kCollisionX.left() + (kCollisionX.getWidth() / 2),
     y_ + kCollisionX.top(),
-    kCollisionX.getWidth() + (kCollisionX.getWidth() / 2) + delta,
+    kCollisionX.getWidth() / 2 + delta,
     kCollisionX.getHeight()
   );
 }
@@ -276,9 +413,9 @@ Rectangle Player::bottomCollision(int delta) const // bottom y
   assert(delta >= 0);
   return Rectangle (
     x_ + kCollisionY.left(),
-    y_ + kCollisionY.top() + (kCollisionY.getHeight() / 2),
+    y_ + kCollisionY.top() + kCollisionY.getHeight() / 2,
     kCollisionY.getWidth(),
-    kCollisionY.getHeight() + (kCollisionY.getHeight() / 2) + delta
+    kCollisionY.getHeight() / 2 + delta
   );
 } 
 
@@ -289,7 +426,7 @@ Rectangle Player::topCollision(int delta) const // top y
     x_ + kCollisionY.left(), 
     y_ + kCollisionY.top() + delta,
     kCollisionY.getWidth(), 
-    (kCollisionY.getHeight() / 2) - delta //lob off half bc we can, taking into account our delta 
+    kCollisionY.getHeight() / 2 - delta //lob off half bc we can, taking into account our delta 
   );
 } 
 

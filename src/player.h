@@ -80,12 +80,16 @@ private:
   friend bool operator<(const SpriteState& a, const SpriteState& b);
   void initializeSprites(Graphics& graphics);
   void initializeSprite(Graphics& graphics, const SpriteState& sprite);
+
   SpriteState getSpriteState();
 
   Rectangle leftCollision(int delta) const; // left x
   Rectangle rightCollision(int delta) const; // right x
   Rectangle bottomCollision(int delta) const; // bottom y
   Rectangle topCollision(int delta) const; // top y
+
+  void updateX(int elapsed_time_ms, const Map& map);
+  void updateY(int elapsed_time_ms, const Map& map);
 
   bool onGround() const {return on_ground_;}
 
