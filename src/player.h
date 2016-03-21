@@ -89,7 +89,7 @@ private:
   HorizontalFacing horizontal_facing_;
   VerticalFacing vertical_facing_;
 
-  std::map<SpriteState, std::unique_ptr<Sprite>> sprites_;
+  std::map<SpriteState, std::shared_ptr<Sprite>> sprites_;
 };
 
 

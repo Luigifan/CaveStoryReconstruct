@@ -113,7 +113,7 @@ void Player::initializeSprite(Graphics& graphics, const SpriteState& sprite)
 
   if(sprite.motion_type == WALKING) //animated
   {
-    sprites_[sprite] = std::unique_ptr<Sprite>(new AnimatedSprite(graphics,
+    sprites_[sprite] = std::shared_ptr<Sprite>(new AnimatedSprite(graphics,
       kSpriteFilePath,
       source_x, source_y,
       Game::kTileSize, Game::kTileSize,
@@ -126,7 +126,7 @@ void Player::initializeSprite(Graphics& graphics, const SpriteState& sprite)
     {
       source_x = sprite.motion_type == STANDING ? kBackFrame * Game::kTileSize : kDownFrame * Game::kTileSize;
     }
-    sprites_[sprite] = std::unique_ptr<Sprite>(new Sprite(graphics,
+    sprites_[sprite] = std::shared_ptr<Sprite>(new Sprite(graphics,
       kSpriteFilePath,
       source_x, source_y,
       Game::kTileSize, Game::kTileSize)

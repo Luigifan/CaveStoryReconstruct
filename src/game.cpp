@@ -5,6 +5,7 @@
 #include "graphics.h"
 #include "player.h"
 #include "input.h"
+#include "map.h"
 
 namespace { //idk what this is
   const int kTargetFramesPerSecond = 120;
@@ -30,12 +31,14 @@ void Game::runEventLoop()
 void Game::update(int elapsed_time_ms)
 {
   player_->update(elapsed_time_ms);
+  map_->update(elapsed_time_ms);
 }
 
 void Game::draw(Graphics& graphics)
 {
   graphics.clear();
   player_->draw(graphics);
+  map_->draw(graphics);
   graphics.flip();
 }
 
@@ -51,6 +54,7 @@ void Game::eventLoop()
   Graphics graphics; //when this loop exits, this will be deconstructed
   Input input;
   player_.reset(new Player(graphics, 320, 240));
+  map_.reset(Map::createTestMap(graphics));
 
   int last_update_time = SDL_GetTicks();
   while(running)

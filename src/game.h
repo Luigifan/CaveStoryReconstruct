@@ -6,6 +6,7 @@
 struct Player;
 struct AnimatedSprite;
 struct Graphics;
+struct Map;
 
 struct Game
 {
@@ -17,7 +18,8 @@ private:
   void eventLoop();
   void update(int elapsed_time_ms);
   void draw(Graphics& graphics);
-  std::unique_ptr<Player> player_;
+  std::shared_ptr<Player> player_;
+  std::shared_ptr<Map> map_;
 };
 
 #endif //GAME_H_
