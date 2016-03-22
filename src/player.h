@@ -30,8 +30,8 @@ struct Player
 private:
   enum MotionType : int{
     FIRST_MOTION_TYPE = 0,
-    STANDING = 0, WALKING = 1, JUMPING = 2, FALLING = 3,
-    LAST_MOTION_TYPE = 4
+    STANDING = 0, WALKING = 1, JUMPING = 2, FALLING = 3, INTERACTING = 4,
+    LAST_MOTION_TYPE = 5
   };
   enum HorizontalFacing {
     FIRST_HORIZONTAL_FACING = 0,
@@ -54,28 +54,6 @@ private:
     HorizontalFacing horizontal_facing;
     VerticalFacing vertical_facing;
   };
-  struct Jump {
-    Jump()
-    {
-      time_remaining_ms_ = 0;
-      active_ = false;
-    }
-    void update(int elapsed_time_ms);
-    void reset();
-    void reactivate()
-    {
-      active_ = time_remaining_ms_ > 0;
-    } //can only reactivate if time remaining > 0
-    void deactivate()
-    {
-      active_ = false;
-    }
-    bool active() const {return active_;}
-  private:
-    int time_remaining_ms_;
-    bool active_;
-  };
-
   //friend because SpriteState is a private friend class of player
   friend bool operator<(const SpriteState& a, const SpriteState& b);
   void initializeSprites(Graphics& graphics);
@@ -94,10 +72,11 @@ private:
   bool onGround() const {return on_ground_;}
 
   float x_, y_;
-  float acceleration_x_;
+  int acceleration_x_; //+, -, 0
   float velocity_x_, velocity_y_;
   bool on_ground_;
-  Jump jump_;
+  bool jump_active_;
+  bool interacting_;
 
   HorizontalFacing horizontal_facing_;
   VerticalFacing vertical_facing_;

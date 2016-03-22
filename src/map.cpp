@@ -30,7 +30,7 @@ Map* Map::createTestMap(Graphics& graphics)
   map->tiles_[10][5] = tile;
   map->tiles_[9][4] = tile;
   map->tiles_[8][3] = tile;
-  map->tiles_[7][2] = tile;
+  //map->tiles_[7][2] = tile;
 
   map->tiles_[10][5] = tile;
 

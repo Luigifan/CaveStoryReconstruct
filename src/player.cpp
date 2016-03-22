@@ -7,14 +7,19 @@
 #include <cassert>
 
 namespace {
-  const float kWalkingAcceleration = 0.0012f; // (pixels / ms) / ms
-  const float kMaxSpeedX = 0.325f; //pixels / ms
   const float kMaxSpeedY = 0.325f; //pixels / ms
-  const float kSlowdownFactor = 0.8f; //Slowdown factor
-  const float kJumpSpeed = 0.325f; //temp pixels / ms
   const float kGravity = 0.0012f; //gravity
 
-  const int kJumpTime = 275; // ms
+  //New constants for motion
+  const float kJumpSpeed = 0.25f;
+  const float kAirAcceleration = 0.0003125f;
+  const float kJumpGravity = 0.0003125f;
+
+  const float kWalkingAcceleration = 0.0083007812f; // (pixels / ms) / ms
+  const float kMaxSpeedX = 0.15859375f; // pixels / ms
+  const float kFriction = 0x0049804687; // (pixels / ms) / ms
+  //
+
   const int kJumpFrame = 1; //frame index for the jump frame
   const int kFallFrame = 2; //frame index for the fall frame
   const int kCharacterFrame = 4; //increase for various other styled quotes :) 0 is default quote
@@ -80,9 +85,11 @@ Player::Player(Graphics& graphics, float x, float y)
 
   velocity_x_ = 0.0f;
   velocity_y_ = 0.0f;
-  acceleration_x_ = 0.0f;
+  acceleration_x_ = 0;
 
   on_ground_ = false;
+  jump_active_ = false;
+  interacting_ = false;
 
   horizontal_facing_ = RIGHT;
   vertical_facing_ = HORIZONTAL;
@@ -131,6 +138,9 @@ void Player::initializeSprite(Graphics& graphics, const SpriteState& sprite)
     case FALLING:
       source_x = kFallFrame * Game::kTileSize;
       break;
+    case INTERACTING:
+      source_x = kBackFrame * Game::kTileSize;
+      break;
     case LAST_MOTION_TYPE: //for completion's sake and to avoid annoying errors
       break;
     default:
@@ -149,9 +159,10 @@ void Player::initializeSprite(Graphics& graphics, const SpriteState& sprite)
   }
   else //static sprite, walking
   {
-    if(sprite.vertical_facing == DOWN)
+    //Only have a down frame if jumping or falling
+    if(sprite.vertical_facing == DOWN && (sprite.motion_type == JUMPING || sprite.motion_type == FALLING))
     {
-      source_x = sprite.motion_type == STANDING ? kBackFrame * Game::kTileSize : kDownFrame * Game::kTileSize;
+      source_x = kDownFrame * Game::kTileSize;
     }
     sprites_[sprite] = std::shared_ptr<Sprite>(new Sprite(graphics,
       kSpriteFilePath,
@@ -164,9 +175,13 @@ void Player::initializeSprite(Graphics& graphics, const SpriteState& sprite)
 Player::SpriteState Player::getSpriteState()
 {
   MotionType motion;
-  if(onGround())
+  if(interacting_)
   {
-    motion = acceleration_x_ == 0.0f ? STANDING : WALKING;
+    motion = INTERACTING;
+  }
+  else if(onGround())
+  {
+    motion = acceleration_x_ == 0 ? STANDING : WALKING;
   }
   else //in the air
   {
@@ -178,7 +193,6 @@ Player::SpriteState Player::getSpriteState()
 void Player::update(int elapsed_time_ms, const Map& map)
 {
   sprites_[getSpriteState()]->update(elapsed_time_ms);
-  jump_.update(elapsed_time_ms);
 
   updateX(elapsed_time_ms, map);
   updateY(elapsed_time_ms, map);
@@ -187,19 +201,34 @@ void Player::update(int elapsed_time_ms, const Map& map)
 void Player::updateX(int elapsed_time_ms, const Map& map)
 {
   // 1. Update velocity
-  velocity_x_ += acceleration_x_ * elapsed_time_ms;
-  if(acceleration_x_ < 0.0f) //moving left
+  float acceleration_x_actual = 0.0f;
+  if(acceleration_x_ < 0) //left
+    acceleration_x_actual = on_ground_ ? -kWalkingAcceleration : -kAirAcceleration;
+  else if(acceleration_x_ > 0) //right
+    acceleration_x_actual = on_ground_ ? kWalkingAcceleration : kAirAcceleration;
+
+  velocity_x_ += acceleration_x_actual * elapsed_time_ms;
+
+  if(acceleration_x_ < 0) //moving left
   {
     velocity_x_ = std::max(velocity_x_, -kMaxSpeedX); //makes sure we don't go below negative max speed
     //so we don't move too fast
   }
-  else if(acceleration_x_ > 0.0f) //moving right
+  else if(acceleration_x_ > 0) //moving right
   {
     velocity_x_ = std::min(velocity_x_, kMaxSpeedX);
   }
   else if(onGround())//not moving
   {
-    velocity_x_ *= kSlowdownFactor;
+    /**
+    Friction opposes motion.
+    Here, we check the direction.
+      If we're going to the right, we want the max of either 0 or or velocity - friction * deltaTime. Why? Because friction opposes motion.
+      Same for left except with max because we're dealing with negative values.
+    */
+    
+    velocity_x_ = velocity_x_ > 0.0f ? std::max(0.0f, velocity_x_ - kFriction * elapsed_time_ms)
+      : std::min(0.0f, velocity_x_ + kFriction * elapsed_time_ms);
   }
 
   // 2. Calculate delta x
@@ -259,11 +288,10 @@ void Player::updateX(int elapsed_time_ms, const Map& map)
 void Player::updateY(int elapsed_time_ms, const Map& map)
 {
   // 1. Update velocity
-  if(jump_.active() == false)
-  {
-    velocity_y_ = std::min(velocity_y_ + (kGravity * elapsed_time_ms),
+  const float gravity = jump_active_ && velocity_y_ < 0.0f ? kJumpGravity : kGravity; //holding jump button
+  
+    velocity_y_ = std::min(velocity_y_ + gravity * elapsed_time_ms,
       kMaxSpeedY);
-  }
 
   // 2. Calculate delta movement for collision
   const int delta = round(velocity_y_ * elapsed_time_ms);
@@ -334,29 +362,38 @@ void Player::draw(Graphics& graphics)
 
 void Player::startMovingLeft()
 {
-  acceleration_x_ = -kWalkingAcceleration;
+  interacting_ = false;
+  acceleration_x_ = -1;
   horizontal_facing_ = LEFT;
 }
 
 void Player::startMovingRight()
 {
-  acceleration_x_ = kWalkingAcceleration;
+  interacting_ = false;
+  acceleration_x_ = 1;
   horizontal_facing_ = RIGHT;
 }
 
 void Player::stopMoving()
 {
-  acceleration_x_ = 0.0f; //no acceleration for velocity slowdown
+  acceleration_x_ = 0; //no acceleration for velocity slowdown
 }
 
 void Player::lookUp()
 {
+  interacting_ = false;
   vertical_facing_ = UP;
 }
 
 void Player::lookDown()
 {
+  //won't set interacting if coming down or looking down.
+  if(vertical_facing_ == DOWN) return;
+
   vertical_facing_ = DOWN;
+
+  if(onGround())
+    interacting_ = true;
 }
 
 void Player::lookHorizontal()
@@ -366,21 +403,22 @@ void Player::lookHorizontal()
 
 void Player::startJump()
 {
+  interacting_ = false;
+  jump_active_ = true;
   if(onGround()) // if we're on the ground: reset jump and give an initial velocity up
   {
-    jump_.reset();
     velocity_y_ = -kJumpSpeed;
   }
   else if(velocity_y_ < 0.0f) //bc negative y = go up
   { // else, mid jump so re-activate anti gravity (non-Mario like)
-    jump_.reactivate();
+    jump_active_ = true;
   }
 }
 
 void Player::stopJump()
 {
   // let go of key, deactivate jump
-  jump_.deactivate();
+  jump_active_ = false;
 }
 
 Rectangle Player::leftCollision(int delta) const // left x
@@ -429,27 +467,3 @@ Rectangle Player::topCollision(int delta) const // top y
     kCollisionY.getHeight() / 2 - delta //lob off half bc we can, taking into account our delta 
   );
 } 
-
-/**
-Begin jump struct external implementations
-*/
-void Player::Jump::reset()
-{
-  time_remaining_ms_ = kJumpTime;
-  reactivate();
-}
-
-void Player::Jump::update(int elapsed_time_ms)
-{
-  if(active_)
-  {
-    time_remaining_ms_ -= elapsed_time_ms;
-    if(time_remaining_ms_ <= 0)
-    {
-      active_ = false;
-    }
-  }
-}
-/**
-End jump struct external implementations
-*/
