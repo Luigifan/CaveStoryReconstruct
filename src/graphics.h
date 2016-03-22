@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include "unit.h"
 struct SDL_Window;
 struct SDL_Rect;
 struct SDL_Renderer;

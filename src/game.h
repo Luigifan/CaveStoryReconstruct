@@ -2,6 +2,7 @@
 #define GAME_H_
 
 #include <memory> //fuck boost
+#include "unit.h"
 
 struct Player;
 struct AnimatedSprite;
@@ -12,13 +13,13 @@ struct Game
 {
   Game();
   ~Game();
-  static int kTileSize;
-  static int kScreenWidth;
-  static int kScreenHeight;
+  
+  static units::Tile kScreenWidth;
+  static units::Tile kScreenHeight;
   void runEventLoop();
 private:
   void eventLoop();
-  void update(int elapsed_time_ms);
+  void update(units::MS elapsed_time_ms);
   void draw(Graphics& graphics);
   std::shared_ptr<Player> player_;
   std::shared_ptr<Map> map_;

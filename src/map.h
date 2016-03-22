@@ -5,6 +5,7 @@
 #include <memory>
 #include "sprite.h"
 #include "backdrop.h"
+#include "unit.h"
 
 struct Graphics;
 struct Rectangle;
@@ -17,7 +18,7 @@ struct Map
 	};
 
 	struct CollisionTile{
-		CollisionTile(int row, int column, TileType type)
+		CollisionTile(units::Tile row, units::Tile column, TileType type)
 		{
 			this->row = row;
 			this->column = column;
@@ -25,7 +26,7 @@ struct Map
 		}
 
 		TileType tile_type_;
-		int row, column;
+		units::Tile row, column;
 	};
 
 
@@ -33,7 +34,7 @@ struct Map
 
 	std::vector<CollisionTile> getCollidingTiles(const Rectangle& rectangle) const; //takes the colliding rectangle
 
-  	void update(int elapsed_time_ms);
+  	void update(units::MS elapsed_time_ms);
   	void drawBackground(Graphics& graphics) const;
   	void draw(Graphics& graphics) const;
 private:

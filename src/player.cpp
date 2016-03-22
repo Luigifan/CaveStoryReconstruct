@@ -7,39 +7,47 @@
 #include <cassert>
 
 namespace {
-  const float kMaxSpeedY = 0.325f; //pixels / ms
-  const float kGravity = 0.0012f; //gravity
+  const units::Velocity kMaxSpeedY = 0.325f; //pixels / ms
+  const units::Acceleration kGravity = 0.0012f; //gravity
 
   //New constants for motion
-  const float kJumpSpeed = 0.25f;
-  const float kAirAcceleration = 0.0003125f;
-  const float kJumpGravity = 0.0003125f;
+  const units::Acceleration kJumpSpeed = 0.25f;
+  const units::Acceleration kAirAcceleration = 0.0003125f;
+  const units::Acceleration kJumpGravity = 0.0003125f;
 
-  const float kWalkingAcceleration = 0.0083007812f; // (pixels / ms) / ms
-  const float kMaxSpeedX = 0.15859375f; // pixels / ms
-  const float kFriction = 0x0049804687; // (pixels / ms) / ms
+  const units::Acceleration kWalkingAcceleration = 0.0083007812f; // (pixels / ms) / ms
+  const units::Velocity kMaxSpeedX = 0.15859375f; // pixels / ms
+  const units::Acceleration kFriction = 0.0049804687f; // (pixels / ms) / ms
   //
 
-  const int kJumpFrame = 1; //frame index for the jump frame
-  const int kFallFrame = 2; //frame index for the fall frame
-  const int kCharacterFrame = 4; //increase for various other styled quotes :) 0 is default quote
-  const int kWalkFrame = 0; //frame index for the walk frame
-  const int kStandFrame = 0; //frame index for standing frame
-  const int kUpFrameOffset = 3; //index offset for if we're looking up
-  const int kDownFrame = 6; //frame index for the looking down frame
-  const int kBackFrame = 7; //frame index for looking back frame
-  const int kWalkFps = 15; //frames per second for the walk animation. lower values will make it slower
-  const int kNumFramesWalk = 3; //the number of frames in the walking animation
+  const units::Frame kJumpFrame = 1; //frame index for the jump frame
+  const units::Frame kFallFrame = 2; //frame index for the fall frame
+  const units::Frame kCharacterFrame = 0; //increase for various other styled quotes :) 0 is default quote
+  const units::Frame kWalkFrame = 0; //frame index for the walk frame
+  const units::Frame kStandFrame = 0; //frame index for standing frame
+  const units::Frame kUpFrameOffset = 3; //index offset for if we're looking up
+  const units::Frame kDownFrame = 6; //frame index for the looking down frame
+  const units::Frame kBackFrame = 7; //frame index for looking back frame
+  const units::FPS kWalkFps = 15; //frames per second for the walk animation. lower values will make it slower
+  const units::Frame kNumFramesWalk = 3; //the number of frames in the walking animation
 
-  const std::string kSpriteFilePath = "content/MyChar.bmp";
+  const std::string kSpriteFilePath = "content/MyChar.pbm";
 
-  const Rectangle kCollisionX(6, 10, 20, 12); // x y w h
-  const Rectangle kCollisionY(10, 2, 12, 30);
+  const Rectangle kCollisionX(6.0f, 
+                              10.0f, 
+                              20.0f, 
+                              12.0f
+                            ); // x y w h
+  const Rectangle kCollisionY(10.0f, 
+                              2.0f, 
+                              12.0f, 
+                              30.0f
+                              );
 
   struct CollisionInfo
   {
       bool collided;
-      int row, column;
+      units::Tile row, column;
   };
 
   CollisionInfo getWallCollisionInfo(const Map& map, const Rectangle& rectangle)
@@ -78,7 +86,7 @@ bool operator<(const Player::SpriteState& a, const Player::SpriteState& b)
   return false;
 }
 
-Player::Player(Graphics& graphics, float x, float y)
+Player::Player(Graphics& graphics, units::Game x, units::Game y)
 {
   x_ = x;
   y_ = y;
@@ -118,42 +126,42 @@ void Player::initializeSprites(Graphics& graphics)
 
 void Player::initializeSprite(Graphics& graphics, const SpriteState& sprite)
 {
-  int source_x, source_y;
-  // source_y will be..
+  units::Tile tile_x, tile_y;
+  // tile_y will be..
     // frame * kTileSize 0 if going left
     // ((frame+ 1) * kTileSize) otherwise
-  source_y = sprite.horizontal_facing == LEFT ? kCharacterFrame * Game::kTileSize : (1 + kCharacterFrame) * Game::kTileSize;
+  tile_y = sprite.horizontal_facing == LEFT ? kCharacterFrame : (1 + kCharacterFrame);
   //depends on vertical facing or horizontal motion type :////
   switch(sprite.motion_type)
   {
     case WALKING:
-      source_x = kWalkFrame * Game::kTileSize;
+      tile_x = kWalkFrame;
       break;
     case STANDING:
-      source_x = kStandFrame * Game::kTileSize;
+      tile_x = kStandFrame;
       break;
     case JUMPING:
-      source_x = kJumpFrame * Game::kTileSize;
+      tile_x = kJumpFrame;
       break;
     case FALLING:
-      source_x = kFallFrame * Game::kTileSize;
+      tile_x = kFallFrame;
       break;
     case INTERACTING:
-      source_x = kBackFrame * Game::kTileSize;
+      tile_x = kBackFrame;
       break;
     case LAST_MOTION_TYPE: //for completion's sake and to avoid annoying errors
       break;
     default:
       break;
   }
-  source_x = sprite.vertical_facing == UP ? source_x = kUpFrameOffset * Game::kTileSize : source_x;
+  tile_x = sprite.vertical_facing == UP ? tile_x = kUpFrameOffset : tile_x;
 
   if(sprite.motion_type == WALKING) //animated
   {
     sprites_[sprite] = std::shared_ptr<Sprite>(new AnimatedSprite(graphics,
       kSpriteFilePath,
-      source_x, source_y,
-      Game::kTileSize, Game::kTileSize,
+      units::tileToPixel(tile_x), units::tileToPixel(tile_y),
+      units::tileToPixel(1), units::tileToPixel(1),
       kWalkFps, kNumFramesWalk)
     );
   }
@@ -162,12 +170,12 @@ void Player::initializeSprite(Graphics& graphics, const SpriteState& sprite)
     //Only have a down frame if jumping or falling
     if(sprite.vertical_facing == DOWN && (sprite.motion_type == JUMPING || sprite.motion_type == FALLING))
     {
-      source_x = kDownFrame * Game::kTileSize;
+      tile_x = kDownFrame;
     }
     sprites_[sprite] = std::shared_ptr<Sprite>(new Sprite(graphics,
       kSpriteFilePath,
-      source_x, source_y,
-      Game::kTileSize, Game::kTileSize)
+      units::tileToPixel(tile_x), units::tileToPixel(tile_y),
+      units::tileToPixel(1), units::tileToPixel(1))
     );
   }
 }
@@ -190,7 +198,7 @@ Player::SpriteState Player::getSpriteState()
   return SpriteState(motion, horizontal_facing_, vertical_facing_);
 }
 
-void Player::update(int elapsed_time_ms, const Map& map)
+void Player::update(units::MS elapsed_time_ms, const Map& map)
 {
   sprites_[getSpriteState()]->update(elapsed_time_ms);
 
@@ -198,10 +206,10 @@ void Player::update(int elapsed_time_ms, const Map& map)
   updateY(elapsed_time_ms, map);
 }
 
-void Player::updateX(int elapsed_time_ms, const Map& map)
+void Player::updateX(units::MS elapsed_time_ms, const Map& map)
 {
   // 1. Update velocity
-  float acceleration_x_actual = 0.0f;
+  units::Acceleration acceleration_x_actual = 0.0f;
   if(acceleration_x_ < 0) //left
     acceleration_x_actual = on_ground_ ? -kWalkingAcceleration : -kAirAcceleration;
   else if(acceleration_x_ > 0) //right
@@ -232,10 +240,10 @@ void Player::updateX(int elapsed_time_ms, const Map& map)
   }
 
   // 2. Calculate delta x
-  const int delta = round(velocity_x_ * elapsed_time_ms);
+  const units::Game delta = velocity_x_ * elapsed_time_ms;
 
   // 3. Check collision in delta direction
-  if(delta > 0)
+  if(delta > 0.0f)
   {
     // 4. Check collision for down direction delta.
     CollisionInfo info = getWallCollisionInfo(map, rightCollision(delta));
@@ -243,7 +251,7 @@ void Player::updateX(int elapsed_time_ms, const Map& map)
     if(info.collided)
     {
       // Alignment and stopping velocity so we don't move anymore.
-      x_ = info.column * Game::kTileSize - kCollisionX.right();
+      x_ = units::tileToGame(info.column) - kCollisionX.right();
       velocity_x_ = 0.0f; //so we don't keep moving
     }
     else
@@ -256,7 +264,7 @@ void Player::updateX(int elapsed_time_ms, const Map& map)
     info = getWallCollisionInfo(map, leftCollision(0));
     if(info.collided)
     {
-      x_ = info.column * Game::kTileSize + kCollisionX.right();
+      x_ = units::tileToGame(info.column) + kCollisionX.right();
     }
   }
   else // moving left
@@ -267,7 +275,7 @@ void Player::updateX(int elapsed_time_ms, const Map& map)
     if(info.collided)
     {
       // Alignment and stopping velocity so we don't move anymore.
-      x_ = info.column * Game::kTileSize + kCollisionX.right();
+      x_ = units::tileToGame(info.column) + kCollisionX.right();
       velocity_x_ = 0.0f; //so we don't keep moving
     }
     else
@@ -280,21 +288,21 @@ void Player::updateX(int elapsed_time_ms, const Map& map)
     info = getWallCollisionInfo(map, rightCollision(0));
     if(info.collided)
     {
-      x_ = info.column * Game::kTileSize - kCollisionX.right();
+      x_ = units::tileToGame(info.column) - kCollisionX.right();
     } 
   }
 }
 
-void Player::updateY(int elapsed_time_ms, const Map& map)
+void Player::updateY(units::MS elapsed_time_ms, const Map& map)
 {
   // 1. Update velocity
-  const float gravity = jump_active_ && velocity_y_ < 0.0f ? kJumpGravity : kGravity; //holding jump button
+  const units::Acceleration gravity = jump_active_ && velocity_y_ < 0.0f ? kJumpGravity : kGravity; //holding jump button
   
     velocity_y_ = std::min(velocity_y_ + gravity * elapsed_time_ms,
       kMaxSpeedY);
 
   // 2. Calculate delta movement for collision
-  const int delta = round(velocity_y_ * elapsed_time_ms);
+  const units::Game delta = velocity_y_ * elapsed_time_ms;
 
   // 3. Check collection for direction of delta (up/down)
   if(delta > 0) //going down
@@ -305,7 +313,7 @@ void Player::updateY(int elapsed_time_ms, const Map& map)
     if(info.collided)
     {
       // Alignment and stopping velocity so we don't move anymore.
-      y_ = info.row * Game::kTileSize - kCollisionY.bottom();
+      y_ = units::tileToGame(info.row) - kCollisionY.bottom();
       velocity_y_ = 0.0f;
       // we could set this to negative to bounce o:
       on_ground_ = true;
@@ -321,7 +329,7 @@ void Player::updateY(int elapsed_time_ms, const Map& map)
     info = getWallCollisionInfo(map, topCollision(0));
     if(info.collided)
     {
-      y_ = info.row * Game::kTileSize + kCollisionY.getHeight();
+      y_ = units::tileToGame(info.row) + kCollisionY.getHeight();
       //on_ground_ = true;
     }
   }
@@ -333,7 +341,7 @@ void Player::updateY(int elapsed_time_ms, const Map& map)
     if(info.collided)
     {
       // Alignment and stopping velocity so we don't move anymore.
-      y_ = info.row * Game::kTileSize + kCollisionY.getHeight();
+      y_ = units::tileToGame(info.row) + kCollisionY.getHeight();
       velocity_y_ = 0.0f;
       // we could set this to negative to bounce o:
       on_ground_ = false;
@@ -349,7 +357,7 @@ void Player::updateY(int elapsed_time_ms, const Map& map)
     info = getWallCollisionInfo(map, bottomCollision(0));
     if(info.collided)
     {
-      y_ = info.row * Game::kTileSize - kCollisionY.bottom();
+      y_ = units::tileToGame(info.row) - kCollisionY.bottom();
       on_ground_ = true;
     }
   }
@@ -421,7 +429,7 @@ void Player::stopJump()
   jump_active_ = false;
 }
 
-Rectangle Player::leftCollision(int delta) const // left x
+Rectangle Player::leftCollision(units::Game delta) const // left x
 {
   //delta is a prediction of where we're going to go
 
@@ -435,7 +443,7 @@ Rectangle Player::leftCollision(int delta) const // left x
   );
 } 
 
-Rectangle Player::rightCollision(int delta) const // right x
+Rectangle Player::rightCollision(units::Game delta) const // right x
 {
   assert(delta >= 0);
   return Rectangle (
@@ -446,7 +454,7 @@ Rectangle Player::rightCollision(int delta) const // right x
   );
 }
 
-Rectangle Player::bottomCollision(int delta) const // bottom y
+Rectangle Player::bottomCollision(units::Game delta) const // bottom y
 {
   assert(delta >= 0);
   return Rectangle (
@@ -457,7 +465,7 @@ Rectangle Player::bottomCollision(int delta) const // bottom y
   );
 } 
 
-Rectangle Player::topCollision(int delta) const // top y
+Rectangle Player::topCollision(units::Game delta) const // top y
 {
   assert(delta <= 0);
   return Rectangle (

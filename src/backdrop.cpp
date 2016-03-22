@@ -1,9 +1,10 @@
 #include "backdrop.h"
 #include "game.h"
+#include "unit.h"
 #include <SDL2/SDL.h>
 
 namespace {
-	const int kBackgroundSize = 128; //pixels
+	const units::Tile kBackgroundSize = 4; //tiles wide
 }
 
 FixedBackdrop::FixedBackdrop(const std::string& path, Graphics& graphics)
@@ -14,13 +15,18 @@ FixedBackdrop::FixedBackdrop(const std::string& path, Graphics& graphics)
 void FixedBackdrop::draw(Graphics& graphics) const
 {
 	//It's fixed and doesn't move. Basic right? We just need to fill the screen
-	
-	for(int x = 0; x < Game::kScreenWidth; x += kBackgroundSize)
+	for(units::Tile x = 0; x < Game::kScreenWidth; x += kBackgroundSize)
 	{
-		for(int y = 0; y < Game::kScreenHeight; y += kBackgroundSize)
+		for(units::Tile y = 0; y < Game::kScreenHeight; y += kBackgroundSize)
 		{
-			SDL_Rect destination {x, y, kBackgroundSize, kBackgroundSize};
-			graphics.drawToScreen(texture_id_, NULL, &destination);
+			SDL_Rect destination 
+			{ 
+				units::tileToPixel(x), 
+				units::tileToPixel(y), 
+				units::tileToPixel(kBackgroundSize),
+				units::tileToPixel(kBackgroundSize)
+			};
+			graphics.drawToScreen(texture_id_, nullptr, &destination);
 		}
 	}
 }

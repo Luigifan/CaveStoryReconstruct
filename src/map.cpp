@@ -10,15 +10,15 @@ using std::shared_ptr;
 //static 
 Map* Map::createTestMap(Graphics& graphics)
 {
-  const shared_ptr<Sprite> EmptySprite(new Sprite(graphics, "content/PrtCave.bmp", 0, 0, 0, 0));
+  const shared_ptr<Sprite> EmptySprite(new Sprite(graphics, "content/Stage/PrtCave.pbm", 0, 0, 0, 0));
 
 
   Map* map = new Map();
 
-  map->backdrop_.reset(new FixedBackdrop("content/bkBlue.bmp", graphics));
+  map->backdrop_.reset(new FixedBackdrop("content/bkBlue.pbm", graphics));
 
-  const int num_rows = 15; //15 * 32 = 480
-  const int num_cols = 20; //20 * 32 = 640 screen w/h
+  const units::Tile num_rows = 15; //15 * 32 = 480
+  const units::Tile num_cols = 20; //20 * 32 = 640 screen w/h
 
   //ensure tiles is the proper size
   map->tiles_ = vector<vector<Tile > >(num_rows, vector<Tile >( num_cols, Tile() ) );
@@ -26,10 +26,10 @@ Map* Map::createTestMap(Graphics& graphics)
   //map->background_sprites_ = vector<vector<shared_ptr<Sprite> > >(num_rows, shared_ptr<Sprite>( num_cols, EmptySprite ) );
 
   //filler tile
-  Tile tile(WALL_TILE, std::shared_ptr<Sprite>(new Sprite(graphics, "content/PrtCave.bmp", Game::kTileSize, 0, Game::kTileSize, Game::kTileSize)));
+  Tile tile(WALL_TILE, std::shared_ptr<Sprite>(new Sprite(graphics, "content/Stage/PrtCave.pbm", units::tileToPixel(1), 0, units::tileToPixel(1), units::tileToPixel(1))));
 
-  const int row_solid = 11;
-  for(int col = 0; col < num_cols; col++)
+  const units::Tile row_solid = 11;
+  for(units::Tile col = 0; col < num_cols; col++)
   {
     //map->foreground_sprites_[row_solid][col] = std::move(sprite);
     map->tiles_[row_solid][col] = tile;
@@ -38,9 +38,9 @@ Map* Map::createTestMap(Graphics& graphics)
   map->tiles_[9][4] = tile;
   map->tiles_[8][3] = tile;
 
-  shared_ptr<Sprite> chain_top(new Sprite(graphics, "content/PrtCave.bmp", 11*Game::kTileSize, 2*Game::kTileSize, Game::kTileSize, Game::kTileSize));
-  shared_ptr<Sprite> chain_middle(new Sprite(graphics, "content/PrtCave.bmp", 12*Game::kTileSize, 2*Game::kTileSize, Game::kTileSize, Game::kTileSize));
-  shared_ptr<Sprite> chain_bottom(new Sprite(graphics, "content/PrtCave.bmp", 13*Game::kTileSize, 2*Game::kTileSize, Game::kTileSize, Game::kTileSize));
+  shared_ptr<Sprite> chain_top(new Sprite(graphics, "content/Stage/PrtCave.pbm", units::tileToPixel(11), units::tileToPixel(2), units::tileToPixel(1), units::tileToPixel(1)));
+  shared_ptr<Sprite> chain_middle(new Sprite(graphics, "content/Stage/PrtCave.pbm", units::tileToPixel(12), units::tileToPixel(2), units::tileToPixel(1), units::tileToPixel(1)));
+  shared_ptr<Sprite> chain_bottom(new Sprite(graphics, "content/Stage/PrtCave.pbm", units::tileToPixel(13), units::tileToPixel(2), units::tileToPixel(1), units::tileToPixel(1)));
 
   map->background_sprites_[9][3] = chain_top;
   map->background_sprites_[10][3] = chain_bottom;
@@ -50,18 +50,19 @@ Map* Map::createTestMap(Graphics& graphics)
 
 std::vector<Map::CollisionTile> Map::getCollidingTiles(const Rectangle& rectangle) const
 {
-  const int first_row = rectangle.top() / Game::kTileSize;
-  const int last_row = rectangle.bottom() / Game::kTileSize;
-  const int first_column = rectangle.left() / Game::kTileSize;
-  const int last_column = rectangle.right() / Game::kTileSize;
+  const units::Tile first_row = units::gameToTile(rectangle.top());
+  const units::Tile last_row = units::gameToTile(rectangle.bottom());
+  const units::Tile first_column = units::gameToTile(rectangle.left());
+  const units::Tile last_column = units::gameToTile(rectangle.right());
+  //printf("top to bottom: %d; %d; %d; %d\n", first_row, last_row, first_column, last_column);
 
   // 1. Calculate first and last row for collision based on our rectangle's position
   std::vector<Map::CollisionTile> collision_tiles;
 
   // 2. Iterate inclusively creating a collision tile deciding collision based on tile type at row, column
-  for(int row = first_row; row <= last_row; row++)
+  for(units::Tile row = first_row; row <= last_row; row++)
   {
-    for(int column = first_column; column <= last_column; column++)
+    for(units::Tile column = first_column; column <= last_column; column++)
     {
       collision_tiles.push_back(CollisionTile(row, column, tiles_[row][column].tile_type_)); //yay
     }
@@ -80,7 +81,7 @@ void Map::drawBackground(Graphics& graphics) const
     {
       if(background_sprites_[row][column])
       {
-        background_sprites_[row][column]->draw(graphics, column*Game::kTileSize, row*Game::kTileSize);
+        background_sprites_[row][column]->draw(graphics, units::tileToGame(column), units::tileToGame(row));
       }
     }
   }
@@ -95,14 +96,14 @@ void Map::draw(Graphics& graphics) const
     {
       if(tiles_[row][column].sprite_)
       {
-        tiles_[row][column].sprite_->draw(graphics, column*Game::kTileSize, row*Game::kTileSize);
+        tiles_[row][column].sprite_->draw(graphics, units::tileToGame(column), units::tileToGame(row));
 
       }
     }
   }
 }
 
-void Map::update(int elapsed_time_ms)
+void Map::update(units::MS elapsed_time_ms)
 {
   //rectangular grid
   for(size_t row = 0; row < tiles_.size(); row++)

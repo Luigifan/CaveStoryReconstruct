@@ -7,12 +7,12 @@
 #include "input.h"
 #include "map.h"
 
-namespace { //idk what this is
-  const int kTargetFramesPerSecond = 60;
+namespace {
+  const units::FPS kTargetFramesPerSecond = 60;
 }
-int Game::kTileSize = 32;
-int Game::kScreenWidth = 640;
-int Game::kScreenHeight = 480;
+
+units::Tile Game::kScreenWidth = 20 ; //640
+units::Tile Game::kScreenHeight = 15 ; //480
 
 Game::Game()
 {
@@ -30,7 +30,7 @@ void Game::runEventLoop()
   this->eventLoop();
 }
 
-void Game::update(int elapsed_time_ms)
+void Game::update(units::MS elapsed_time_ms)
 {
   player_->update(elapsed_time_ms, *map_); //dereference that bitch
   map_->update(elapsed_time_ms);
@@ -56,13 +56,13 @@ void Game::eventLoop()
   SDL_Event event;
   Graphics graphics; //when this loop exits, this will be deconstructed
   Input input;
-  player_.reset(new Player(graphics, 320, 240));
+  player_.reset(new Player(graphics, units::tileToGame(kScreenWidth / 2), units::tileToGame(kScreenHeight / 2)));
   map_.reset(Map::createTestMap(graphics));
 
-  int last_update_time = SDL_GetTicks();
+  units::MS last_update_time = SDL_GetTicks();
   while(running)
   {
-    const int startTimeMs = SDL_GetTicks();
+    const units::MS startTimeMs = SDL_GetTicks();
     input.beginNewFrame();
     while(SDL_PollEvent(&event))
     {
@@ -130,14 +130,14 @@ void Game::eventLoop()
     }
 
 
-    const int current_time_ms = SDL_GetTicks();
+    const units::MS current_time_ms = SDL_GetTicks();
     update(current_time_ms - last_update_time);
     last_update_time = current_time_ms;
 
     draw(graphics);
 
-    const int ms_per_frame = 1000 / kTargetFramesPerSecond;
-    const int elapsed_time_ms = SDL_GetTicks() - startTimeMs;
+    const units::MS ms_per_frame = 1000 / kTargetFramesPerSecond;
+    const units::MS elapsed_time_ms = SDL_GetTicks() - startTimeMs;
 
     if(elapsed_time_ms < ms_per_frame)
     {

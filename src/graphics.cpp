@@ -15,12 +15,12 @@ Graphics::Graphics()
 	sdlWindow = SDL_CreateWindow(NULL,
     	SDL_WINDOWPOS_UNDEFINED,
     	SDL_WINDOWPOS_UNDEFINED,
-    	Game::kScreenWidth,
-    	Game::kScreenHeight,
+    	units::tileToPixel(Game::kScreenWidth),
+    	units::tileToPixel(Game::kScreenHeight),
     	SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     renderer = SDL_CreateRenderer(sdlWindow, -1, 0);
-    SDL_RenderSetLogicalSize(renderer, Game::kScreenWidth, Game::kScreenHeight);
+    SDL_RenderSetLogicalSize(renderer, units::tileToPixel(Game::kScreenWidth), units::tileToPixel(Game::kScreenHeight));
 }
 Graphics::~Graphics()
 {
@@ -66,6 +66,7 @@ void Graphics::flip()
 {
 	SDL_RenderPresent(renderer);
 }
+
 void Graphics::drawToScreen(TextureID source, SDL_Rect* source_rectangle, SDL_Rect* destination_rectangle)
 {
 	if(SDL_RenderCopy(renderer, source, source_rectangle, destination_rectangle) != 0)

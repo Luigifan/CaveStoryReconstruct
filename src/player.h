@@ -5,16 +5,17 @@
 #include <map>
 #include "animated_sprite.h"
 #include "rectangle.h"
+#include "unit.h"
 
 struct Graphics;
 struct Map;
 
 struct Player
 {
-  Player(Graphics& graphics, float x, float y);
+  Player(Graphics& graphics, units::Game x, units::Game y);
 
   //Update velocity, calculate delta, check collision, react, repeat.
-  void update(int elapsed_time_ms, const Map& map);
+  void update(units::MS elapsed_time_ms, const Map& map);
   void draw(Graphics& graphics);
 
   void startMovingLeft();
@@ -61,19 +62,19 @@ private:
 
   SpriteState getSpriteState();
 
-  Rectangle leftCollision(int delta) const; // left x
-  Rectangle rightCollision(int delta) const; // right x
-  Rectangle bottomCollision(int delta) const; // bottom y
-  Rectangle topCollision(int delta) const; // top y
+  Rectangle leftCollision(units::Game delta) const; // left x
+  Rectangle rightCollision(units::Game delta) const; // right x
+  Rectangle bottomCollision(units::Game delta) const; // bottom y
+  Rectangle topCollision(units::Game delta) const; // top y
 
-  void updateX(int elapsed_time_ms, const Map& map);
-  void updateY(int elapsed_time_ms, const Map& map);
+  void updateX(units::MS elapsed_time_ms, const Map& map);
+  void updateY(units::MS elapsed_time_ms, const Map& map);
 
   bool onGround() const {return on_ground_;}
 
-  float x_, y_;
-  int acceleration_x_; //+, -, 0
-  float velocity_x_, velocity_y_;
+  units::Game x_, y_;
+  /*special acceleration*/int acceleration_x_; //+, -, 0
+  units::Velocity velocity_x_, velocity_y_;
   bool on_ground_;
   bool jump_active_;
   bool interacting_;

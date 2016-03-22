@@ -7,13 +7,20 @@ struct Graphics;
 
 struct AnimatedSprite : public Sprite //public because it IS a sprite
 {
-	AnimatedSprite(Graphics& graphics, const std::string& file_path, int source_x, int source_y, int width, int height, int fps, int num_frames); //wow
-	virtual void update(int elapsed_time_ms) override;
+	AnimatedSprite(Graphics& graphics, const std::string& file_path, 
+		units::Pixel source_x, 
+		units::Pixel source_y, 
+		units::Pixel width, 
+		units::Pixel height, 
+		units::FPS fps, 
+		units::Frame num_frames); //wow
+
+	virtual void update(units::MS elapsed_time_ms) override;
 private:
-	const int frame_time_; //fps
-	const int num_frames_;
-	int current_frame_;
-	int elapsed_time_; //since last frame change
+	const units::MS frame_time_; //fps
+	const units::Frame num_frames_;
+	units::Frame current_frame_;
+	units::MS elapsed_time_; //since last frame change
 };
 
 #endif
