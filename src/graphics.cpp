@@ -35,6 +35,11 @@ Graphics::~Graphics()
 
 }
 
+void Graphics::setWindowText(const std::string& newWindowTitle) const
+{
+  SDL_SetWindowTitle(sdlWindow, newWindowTitle.c_str());
+}
+
 Graphics::TextureID Graphics::loadImage(const std::string& file_path, bool blackTransparent)
 {
 	if(sprite_sheets_.count(file_path) == 0) //doesn't exist, need to actually load

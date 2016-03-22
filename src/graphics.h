@@ -20,6 +20,7 @@ struct Graphics
 	//Sprite* createSprite(const std::string& path, int source_x, int source_y, int width, int height);
 	//AnimatedSprite* createAnimatedSprite(const std::string& path, int source_x, int source_y, int width, int height, int fps, int frame_count);
 	void drawToScreen(TextureID source, SDL_Rect* source_rectangle, SDL_Rect* destination_rectangle);
+	void setWindowText(const std::string& newWindowTitle) const;
 	void flip();
 	void clear();
 private:

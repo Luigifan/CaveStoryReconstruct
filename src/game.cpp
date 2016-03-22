@@ -9,7 +9,7 @@
 
 namespace {
   const units::FPS kTargetFramesPerSecond = 60;
-  const units::MS kMaxFrameTime = 5 * 1000 / 60;
+  const units::MS kMaxFrameTime = 5 * 1000 / kTargetFramesPerSecond;
 }
 
 units::Tile Game::kScreenWidth = 20 ; //640
@@ -142,6 +142,7 @@ void Game::eventLoop()
     const units::MS ms_per_frame = 1000 / kTargetFramesPerSecond;
     const units::MS elapsed_time_ms = SDL_GetTicks() - startTimeMs;
 
+    graphics.setWindowText("Cave Story - " + std::to_string(int(1.0f / (ms_per_frame - elapsed_time_ms) * 1000.0f)) + "fps");
     if(elapsed_time_ms < ms_per_frame)
     {
       SDL_Delay(ms_per_frame - elapsed_time_ms);
