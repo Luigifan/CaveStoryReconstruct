@@ -11,6 +11,8 @@ namespace { //idk what this is
   const int kTargetFramesPerSecond = 60;
 }
 int Game::kTileSize = 32;
+int Game::kScreenWidth = 640;
+int Game::kScreenHeight = 480;
 
 Game::Game()
 {
@@ -37,6 +39,7 @@ void Game::update(int elapsed_time_ms)
 void Game::draw(Graphics& graphics)
 {
   graphics.clear();
+  map_->drawBackground(graphics);
   player_->draw(graphics);
   map_->draw(graphics);
   graphics.flip();

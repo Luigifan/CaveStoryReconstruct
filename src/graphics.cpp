@@ -1,13 +1,12 @@
 #include "graphics.h"
 #include "sprite.h"
 #include "animated_sprite.h"
+#include "game.h"
 
 #include <iostream>
 #include <SDL2/SDL.h>
 
 namespace {
-	const int kScreenWidth = 640;
-  	const int kScreenHeight = 480;
   	const int kBitsPerPixel = 32;
 }
 
@@ -16,12 +15,12 @@ Graphics::Graphics()
 	sdlWindow = SDL_CreateWindow(NULL,
     	SDL_WINDOWPOS_UNDEFINED,
     	SDL_WINDOWPOS_UNDEFINED,
-    	kScreenWidth,
-    	kScreenHeight,
+    	Game::kScreenWidth,
+    	Game::kScreenHeight,
     	SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     renderer = SDL_CreateRenderer(sdlWindow, -1, 0);
-    SDL_RenderSetLogicalSize(renderer, kScreenWidth, kScreenHeight);
+    SDL_RenderSetLogicalSize(renderer, Game::kScreenWidth, Game::kScreenHeight);
 }
 Graphics::~Graphics()
 {
@@ -36,12 +35,14 @@ Graphics::~Graphics()
 
 }
 
-Graphics::TextureID Graphics::loadImage(const std::string& file_path)
+Graphics::TextureID Graphics::loadImage(const std::string& file_path, bool blackTransparent)
 {
 	if(sprite_sheets_.count(file_path) == 0) //doesn't exist, need to actually load
 	{
 		//here we load
 		SDL_Surface* surf = SDL_LoadBMP(file_path.c_str());
+		if(blackTransparent)
+			SDL_SetColorKey(surf, SDL_TRUE, 0); //0 is black
 		if(surf == nullptr)
 		{
 			std::cerr << "Couldn't load texture: " << SDL_GetError() << std::endl;

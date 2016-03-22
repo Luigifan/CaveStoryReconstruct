@@ -15,7 +15,7 @@ struct Graphics
 	typedef SDL_Texture* TextureID;
 	Graphics();
 	~Graphics();
-	TextureID loadImage(const std::string& file_path);
+	TextureID loadImage(const std::string& file_path, bool blackTransparent = false);
 	//Sprite* createSprite(const std::string& path, int source_x, int source_y, int width, int height);
 	//AnimatedSprite* createAnimatedSprite(const std::string& path, int source_x, int source_y, int width, int height, int fps, int frame_count);
 	void drawToScreen(TextureID source, SDL_Rect* source_rectangle, SDL_Rect* destination_rectangle);

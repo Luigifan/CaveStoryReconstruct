@@ -12,6 +12,8 @@ Map* Map::createTestMap(Graphics& graphics)
 {
   Map* map = new Map();
 
+  map->backdrop_.reset(new FixedBackdrop("content/bkBlue.bmp", graphics));
+
   const int num_rows = 15; //15 * 32 = 480
   const int num_cols = 20; //20 * 32 = 640 screen w/h
 
@@ -57,6 +59,11 @@ std::vector<Map::CollisionTile> Map::getCollidingTiles(const Rectangle& rectangl
   }
 
   return collision_tiles;
+}
+
+void Map::drawBackground(Graphics& graphics) const
+{
+  backdrop_->draw(graphics);
 }
 
 void Map::draw(Graphics& graphics) const

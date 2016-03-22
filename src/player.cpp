@@ -430,7 +430,7 @@ Rectangle Player::leftCollision(int delta) const // left x
   return Rectangle (
     x_ + kCollisionX.left() + delta, 
     y_ + kCollisionX.top(),
-    (kCollisionX.getWidth() / 2) - delta, //lob off half bc we can, taking into account our delta 
+    kCollisionX.getWidth() / 2 - delta, //lob off half bc we can, taking into account our delta 
     kCollisionX.getHeight()
   );
 } 

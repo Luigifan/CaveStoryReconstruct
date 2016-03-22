@@ -6,7 +6,7 @@
 
 Sprite::Sprite(Graphics& graphics, const std::string& file_path, int source_x, int source_y, int width, int height)
 {
-	sprite_sheet_ = graphics.loadImage(file_path.c_str());
+	sprite_sheet_ = graphics.loadImage(file_path.c_str(), true);
 	//SDL_FreeSurface(surf);
 	if(sprite_sheet_ == nullptr)
 	{

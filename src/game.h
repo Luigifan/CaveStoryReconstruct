@@ -13,6 +13,8 @@ struct Game
   Game();
   ~Game();
   static int kTileSize;
+  static int kScreenWidth;
+  static int kScreenHeight;
   void runEventLoop();
 private:
   void eventLoop();

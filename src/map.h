@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "sprite.h"
+#include "backdrop.h"
 
 struct Graphics;
 struct Rectangle;
@@ -33,6 +34,7 @@ struct Map
 	std::vector<CollisionTile> getCollidingTiles(const Rectangle& rectangle) const; //takes the colliding rectangle
 
   	void update(int elapsed_time_ms);
+  	void drawBackground(Graphics& graphics) const;
   	void draw(Graphics& graphics) const;
 private:
 	struct Tile
@@ -45,7 +47,7 @@ private:
 		TileType tile_type_;
 		std::shared_ptr<Sprite> sprite_;
 	};
-
+	std::shared_ptr<Backdrop> backdrop_;
   	typedef std::vector<std::vector<Tile> > ForegroundTiles; //yeet love C++ typedefs tbh
   	ForegroundTiles tiles_;
 };
