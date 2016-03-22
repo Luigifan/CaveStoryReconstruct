@@ -49,7 +49,10 @@ private:
 	};
 	std::shared_ptr<Backdrop> backdrop_;
   	typedef std::vector<std::vector<Tile> > ForegroundTiles; //yeet love C++ typedefs tbh
+  	typedef std::vector<std::vector<std::shared_ptr<Sprite> > > BackgroundSprites;
   	ForegroundTiles tiles_;
+  	BackgroundSprites background_sprites_;
+
 };
 
 #endif //MAP_H_

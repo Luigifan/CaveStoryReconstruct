@@ -10,6 +10,9 @@ using std::shared_ptr;
 //static 
 Map* Map::createTestMap(Graphics& graphics)
 {
+  const shared_ptr<Sprite> EmptySprite(new Sprite(graphics, "content/PrtCave.bmp", 0, 0, 0, 0));
+
+
   Map* map = new Map();
 
   map->backdrop_.reset(new FixedBackdrop("content/bkBlue.bmp", graphics));
@@ -17,8 +20,10 @@ Map* Map::createTestMap(Graphics& graphics)
   const int num_rows = 15; //15 * 32 = 480
   const int num_cols = 20; //20 * 32 = 640 screen w/h
 
-  //ensure foreground sprites is the proper size
+  //ensure tiles is the proper size
   map->tiles_ = vector<vector<Tile > >(num_rows, vector<Tile >( num_cols, Tile() ) );
+  map->background_sprites_ = vector<vector<shared_ptr<Sprite> > >(num_rows, vector<shared_ptr<Sprite>>(num_cols, nullptr));
+  //map->background_sprites_ = vector<vector<shared_ptr<Sprite> > >(num_rows, shared_ptr<Sprite>( num_cols, EmptySprite ) );
 
   //filler tile
   Tile tile(WALL_TILE, std::shared_ptr<Sprite>(new Sprite(graphics, "content/PrtCave.bmp", Game::kTileSize, 0, Game::kTileSize, Game::kTileSize)));
@@ -32,9 +37,13 @@ Map* Map::createTestMap(Graphics& graphics)
   map->tiles_[10][5] = tile;
   map->tiles_[9][4] = tile;
   map->tiles_[8][3] = tile;
-  //map->tiles_[7][2] = tile;
 
-  map->tiles_[10][5] = tile;
+  shared_ptr<Sprite> chain_top(new Sprite(graphics, "content/PrtCave.bmp", 11*Game::kTileSize, 2*Game::kTileSize, Game::kTileSize, Game::kTileSize));
+  shared_ptr<Sprite> chain_middle(new Sprite(graphics, "content/PrtCave.bmp", 12*Game::kTileSize, 2*Game::kTileSize, Game::kTileSize, Game::kTileSize));
+  shared_ptr<Sprite> chain_bottom(new Sprite(graphics, "content/PrtCave.bmp", 13*Game::kTileSize, 2*Game::kTileSize, Game::kTileSize, Game::kTileSize));
+
+  map->background_sprites_[9][3] = chain_top;
+  map->background_sprites_[10][3] = chain_bottom;
 
   return map;
 }
@@ -64,6 +73,17 @@ std::vector<Map::CollisionTile> Map::getCollidingTiles(const Rectangle& rectangl
 void Map::drawBackground(Graphics& graphics) const
 {
   backdrop_->draw(graphics);
+
+  for(size_t row = 0; row < background_sprites_.size(); row++)
+  {
+    for(size_t column = 0; column < background_sprites_[row].size(); column++)
+    {
+      if(background_sprites_[row][column])
+      {
+        background_sprites_[row][column]->draw(graphics, column*Game::kTileSize, row*Game::kTileSize);
+      }
+    }
+  }
 }
 
 void Map::draw(Graphics& graphics) const
@@ -76,6 +96,7 @@ void Map::draw(Graphics& graphics) const
       if(tiles_[row][column].sprite_)
       {
         tiles_[row][column].sprite_->draw(graphics, column*Game::kTileSize, row*Game::kTileSize);
+
       }
     }
   }
