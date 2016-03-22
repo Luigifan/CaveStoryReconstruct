@@ -4,6 +4,7 @@
 #include "game.h"
 
 #include <iostream>
+#include <cassert>
 #include <SDL2/SDL.h>
 
 namespace {
@@ -48,14 +49,9 @@ Graphics::TextureID Graphics::loadImage(const std::string& file_path, bool black
 		SDL_Surface* surf = SDL_LoadBMP(file_path.c_str());
 		if(blackTransparent)
 			SDL_SetColorKey(surf, SDL_TRUE, 0); //0 is black
-		if(surf == nullptr)
-		{
-			std::cerr << "Couldn't load texture: " << SDL_GetError() << std::endl;
-		}
-		else
-		{
-			sprite_sheets_[file_path] = SDL_CreateTextureFromSurface(renderer, surf);
-		}
+
+    assert(surf != nullptr);
+    sprite_sheets_[file_path] = SDL_CreateTextureFromSurface(renderer, surf);
 		if(surf != nullptr)
 			SDL_FreeSurface(surf);
 	}
