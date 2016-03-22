@@ -9,6 +9,7 @@
 
 namespace {
   const units::FPS kTargetFramesPerSecond = 60;
+  const units::MS kMaxFrameTime = 5 * 1000 / 60;
 }
 
 units::Tile Game::kScreenWidth = 20 ; //640
@@ -131,7 +132,9 @@ void Game::eventLoop()
 
 
     const units::MS current_time_ms = SDL_GetTicks();
-    update(current_time_ms - last_update_time);
+    const units::MS elapsed_time_between_updates = current_time_ms - last_update_time;
+    //this is what ensures frame times are consistent
+    update(std::min(elapsed_time_between_updates, kMaxFrameTime));
     last_update_time = current_time_ms;
 
     draw(graphics);
