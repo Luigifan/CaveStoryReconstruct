@@ -1,7 +1,6 @@
 #include "sprite.h"
 #include "graphics.h"
 
-#include <SDL2/SDL_image.h>
 #include <iostream>
 
 Sprite::Sprite(Graphics& graphics, const std::string& file_path, 
@@ -11,7 +10,7 @@ Sprite::Sprite(Graphics& graphics, const std::string& file_path,
 	//SDL_FreeSurface(surf);
 	if(sprite_sheet_ == nullptr)
 	{
-		std::cerr << "Error loading sprite: " << IMG_GetError() << std::endl;
+		std::cerr << "Error loading sprite: " << SDL_GetError() << std::endl;
 	}
 	source_rect_.x = source_x;
 	source_rect_.y = source_y;

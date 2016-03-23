@@ -5,6 +5,7 @@
 
 #include <cmath> //yeet
 #include <cassert>
+#include <algorithm>
 
 namespace {
   const units::Velocity kMaxSpeedY = 0.325f; //pixels / ms

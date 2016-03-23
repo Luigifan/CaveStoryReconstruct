@@ -1,6 +1,7 @@
 #include "game.h"
 
 #include <stdlib.h>
+#include <algorithm>
 #include <SDL2/SDL.h>
 #include "graphics.h"
 #include "player.h"
