@@ -47,13 +47,16 @@ Graphics::TextureID Graphics::loadImage(const std::string& file_path, bool black
 	{
 		//here we load
 		SDL_Surface* surf = SDL_LoadBMP(file_path.c_str());
-		if(blackTransparent)
-			SDL_SetColorKey(surf, SDL_TRUE, 0); //0 is black
+        if (blackTransparent)
+        {
+            const Uint32 black_color = SDL_MapRGB(surf->format, 0, 0, 0);
+            SDL_SetColorKey(surf, SDL_TRUE, 0); //0 is black
+        }
 
-    assert(surf != nullptr);
-    sprite_sheets_[file_path] = SDL_CreateTextureFromSurface(renderer, surf);
-		if(surf != nullptr)
-			SDL_FreeSurface(surf);
+        assert(surf != nullptr);
+        sprite_sheets_[file_path] = SDL_CreateTextureFromSurface(renderer, surf);
+		    if(surf != nullptr)
+			    SDL_FreeSurface(surf);
 	}
 
 	return sprite_sheets_[file_path];

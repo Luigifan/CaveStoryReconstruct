@@ -41,9 +41,11 @@ void Game::update(units::MS elapsed_time_ms)
 
 	player_->update(elapsed_time_ms, *map_); //dereference that bitch
 	bat_->update(elapsed_time_ms, player_->getCenterX());
-	//printf("Checking collisions\n");
-	if(bat_->damageRectangle().collidesWith(player_->getDamageRect()))
-		printf("\tDo damage!\n");
+	
+	if (bat_->damageRectangle().collidesWith(player_->getDamageRect()))
+	{
+		player_->takeDamage();
+	}
 }
 
 void Game::draw(Graphics& graphics)
@@ -53,6 +55,7 @@ void Game::draw(Graphics& graphics)
   player_->draw(graphics);
   bat_->draw(graphics);
   map_->draw(graphics);
+  player_->drawHUD(graphics);
   graphics.flip();
 }
 
@@ -66,7 +69,7 @@ void Game::eventLoop()
   bool running = true;
   SDL_Event event;
   Graphics graphics; //when this loop exits, this will be deconstructed
-  graphics.setWindowText("Cave Story");
+  graphics.setWindowText("Core Story");
   Input input;
   player_.reset(new Player(graphics, units::tileToGame(kScreenWidth / 2), units::tileToGame(kScreenHeight / 2)));
   bat_.reset(new FirstCaveBat(graphics, units::tileToGame(7), units::tileToGame(kScreenHeight / 2 + 1)));

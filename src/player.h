@@ -18,6 +18,8 @@ struct Player
   void update(units::MS elapsed_time_ms, const Map& map);
   void draw(Graphics& graphics);
 
+  void drawHUD(Graphics& graphics) const;
+
   void startMovingLeft();
   void startMovingRight();
   void stopMoving();
@@ -29,11 +31,13 @@ struct Player
   void startJump();
   void stopJump();
 
+  void takeDamage();
+
   Rectangle getDamageRect() const;
 
   units::Game getCenterX() const
   {
-	  return x_ + units::tileToGame(1) / 2.0f;
+	  return x_ + units::kHalfTile;
   }
 private:
   enum MotionType : int{
@@ -77,6 +81,8 @@ private:
   void updateX(units::MS elapsed_time_ms, const Map& map);
   void updateY(units::MS elapsed_time_ms, const Map& map);
 
+  bool spriteIsVisible() const;
+
   bool onGround() const {return on_ground_;}
 
   units::Game x_, y_;
@@ -86,10 +92,20 @@ private:
   bool jump_active_;
   bool interacting_;
 
+  bool invincible_;
+  units::MS invincible_time_;
+
   HorizontalFacing horizontal_facing_;
   VerticalFacing vertical_facing_;
 
   std::map<SpriteState, std::shared_ptr<Sprite>> sprites_;
+
+  ///Health
+  std::unique_ptr<Sprite> health_bar_sprite_; //background for the health bar. always there.
+  std::unique_ptr<Sprite> health_fill_sprite_;
+  std::unique_ptr<Sprite> three_;
+  ///
+
 };
 
 
