@@ -28,6 +28,11 @@ struct Player
 
   void startJump();
   void stopJump();
+
+  units::Game getCenterX() const
+  {
+	  return x_ + units::tileToGame(1) / 2.0f;
+  }
 private:
   enum MotionType : int{
     FIRST_MOTION_TYPE = 0,

@@ -38,7 +38,7 @@ void Game::runEventLoop()
 void Game::update(units::MS elapsed_time_ms)
 {
   player_->update(elapsed_time_ms, *map_); //dereference that bitch
-  bat_->update(elapsed_time_ms);
+  bat_->update(elapsed_time_ms, player_->getCenterX());
   map_->update(elapsed_time_ms);
 }
 

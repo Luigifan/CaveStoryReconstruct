@@ -15,8 +15,13 @@ typedef unsigned int FPS; // Frames per Second (Hz or 1 / Second)
 
 typedef float Velocity; // Game / MS
 typedef float Acceleration; // Game / MS / MS
+
+typedef float Degrees;
+typedef float AngularVelocity; //degrees / ms
+
 namespace {
-const Game kTileSize = 32.0f;
+	const Game kTileSize = 32.0f;
+	const double kPi = atan(1) * 4; // 22 / 7
 }
 
 inline Pixel gameToPixel(Game game) {
@@ -34,6 +39,11 @@ inline Game tileToGame(Tile tile) {
 
 inline Pixel tileToPixel(Tile tile) {
    return gameToPixel(tileToGame(tile));
+}
+
+inline double degreesToRadians(Degrees degrees)
+{
+	return degrees * kPi / 180.0f;
 }
 
 } // units
