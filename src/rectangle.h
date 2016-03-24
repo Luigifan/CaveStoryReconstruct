@@ -15,6 +15,14 @@ struct Rectangle
 
 	units::Game getWidth() const {return w_;}
 	units::Game getHeight() const {return h_;}
+
+	bool collidesWith(const Rectangle& other) const
+	{
+		return right() >= other.left() && 
+			left() <= other.right() && 
+			top() <= other.bottom() && 
+			bottom() >= other.top();
+	};
 private:
 	const units::Game x_, y_, w_, h_; //axis aligned, don't hold rotation.
 };

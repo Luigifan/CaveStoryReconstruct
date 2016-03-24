@@ -106,6 +106,12 @@ Player::Player(Graphics& graphics, units::Game x, units::Game y)
   initializeSprites(graphics);
 }
 
+Rectangle Player::getDamageRect() const
+{
+	//combination of kCollisionX rect and kCollisionY rect at our x/y
+	return Rectangle(x_ + kCollisionX.left(), y_ + kCollisionY.top(), kCollisionX.getWidth(), kCollisionY.getHeight());
+}
+
 void Player::initializeSprites(Graphics& graphics)
 {
   // for every motion type

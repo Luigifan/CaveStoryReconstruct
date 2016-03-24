@@ -37,9 +37,13 @@ void Game::runEventLoop()
 
 void Game::update(units::MS elapsed_time_ms)
 {
-  player_->update(elapsed_time_ms, *map_); //dereference that bitch
-  bat_->update(elapsed_time_ms, player_->getCenterX());
-  map_->update(elapsed_time_ms);
+	//map_->update(elapsed_time_ms);
+
+	player_->update(elapsed_time_ms, *map_); //dereference that bitch
+	bat_->update(elapsed_time_ms, player_->getCenterX());
+	//printf("Checking collisions\n");
+	if(bat_->damageRectangle().collidesWith(player_->getDamageRect()))
+		printf("\tDo damage!\n");
 }
 
 void Game::draw(Graphics& graphics)
@@ -65,7 +69,7 @@ void Game::eventLoop()
   graphics.setWindowText("Cave Story");
   Input input;
   player_.reset(new Player(graphics, units::tileToGame(kScreenWidth / 2), units::tileToGame(kScreenHeight / 2)));
-  bat_.reset(new FirstCaveBat(graphics, units::tileToGame(5), units::tileToGame(kScreenHeight / 2)));
+  bat_.reset(new FirstCaveBat(graphics, units::tileToGame(7), units::tileToGame(kScreenHeight / 2 + 1)));
   map_.reset(Map::createTestMap(graphics));
 
   units::MS last_update_time = SDL_GetTicks();

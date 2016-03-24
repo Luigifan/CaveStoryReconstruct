@@ -29,6 +29,8 @@ struct Player
   void startJump();
   void stopJump();
 
+  Rectangle getDamageRect() const;
+
   units::Game getCenterX() const
   {
 	  return x_ + units::tileToGame(1) / 2.0f;

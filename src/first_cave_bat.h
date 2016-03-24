@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include "unit.h"
+#include "rectangle.h"
 
 struct Sprite;
 struct Graphics;
@@ -13,6 +14,13 @@ struct FirstCaveBat
 	FirstCaveBat(Graphics& graphics, units::Game x, units::Game y);
 	void draw(Graphics& graphics);
 	void update(units::MS elapsed_time_ms, units::Game player_x);
+
+	Rectangle damageRectangle() const
+	{
+		//single point
+		return Rectangle(x_ + units::tileToGame(1) / 2.0f, y_ + units::tileToGame(1) / 2.0f, 0, 0);
+	}
+
 private:
 	enum Facing {
 		LEFT = 0,
@@ -32,6 +40,7 @@ private:
 
 	std::map<SpriteState, std::shared_ptr<Sprite>> sprite_map_;
 	units::Game x_, y_;
+	const units::Game center_y_;
 	units::Degrees flight_angle_;
 	Facing facing_;
 };

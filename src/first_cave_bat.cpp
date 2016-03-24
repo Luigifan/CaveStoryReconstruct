@@ -14,7 +14,7 @@ namespace {
 	const units::AngularVelocity kAngularVelocity = 120.0f / 1000.0f; //120 degrees / 1 second.
 }
 
-FirstCaveBat::FirstCaveBat(Graphics& graphics, units::Game x, units::Game y)
+FirstCaveBat::FirstCaveBat(Graphics& graphics, units::Game x, units::Game y) : center_y_(y)
 {
 	x_ = x;
 	y_ = y;
@@ -26,10 +26,7 @@ FirstCaveBat::FirstCaveBat(Graphics& graphics, units::Game x, units::Game y)
 
 void FirstCaveBat::draw(Graphics& graphics)
 {
-	//keep y constant but use it as part of our sine movement
-	//								5 units total		   amplitude of 2
-	const units::Game draw_y = y_ + units::tileToGame(5) / 2.0f * std::sin(units::degreesToRadians(flight_angle_));
-	sprite_map_[getSpriteState()]->draw(graphics, x_, draw_y);
+	sprite_map_[getSpriteState()]->draw(graphics, x_, y_);
 }
 
 void FirstCaveBat::update(units::MS elapsed_time_ms, units::Game player_x)
@@ -37,6 +34,10 @@ void FirstCaveBat::update(units::MS elapsed_time_ms, units::Game player_x)
 	flight_angle_ += kAngularVelocity * elapsed_time_ms;
 
 	facing_ = x_ + units::tileToGame(1) / 2.0f > player_x ? LEFT : RIGHT; //if our x is less than player's x, face right
+
+	//keep y constant but use it as part of our sine movement
+	//								5 units total		   amplitude of 2
+	y_ = center_y_ + units::tileToGame(5) / 2.0f * units::Game(std::sin(units::degreesToRadians(flight_angle_)));
 
 	sprite_map_[getSpriteState()]->update(elapsed_time_ms);
 }
