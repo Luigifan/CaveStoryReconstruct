@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\animated_sprite.cpp" />
     <ClCompile Include="src\backdrop.cpp" />
+    <ClCompile Include="src\first_cave_bat.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\graphics.cpp" />
     <ClCompile Include="src\input.cpp" />
@@ -32,6 +33,7 @@
   <ItemGroup>
     <ClInclude Include="src\animated_sprite.h" />
     <ClInclude Include="src\backdrop.h" />
+    <ClInclude Include="src\first_cave_bat.h" />
     <ClInclude Include="src\game.h" />
     <ClInclude Include="src\graphics.h" />
     <ClInclude Include="src\input.h" />

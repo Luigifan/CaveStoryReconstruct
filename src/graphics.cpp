@@ -16,8 +16,8 @@ Graphics::Graphics()
 	sdlWindow = SDL_CreateWindow(NULL,
     	SDL_WINDOWPOS_UNDEFINED,
     	SDL_WINDOWPOS_UNDEFINED,
-    	units::tileToPixel(Game::kScreenWidth),
-    	units::tileToPixel(Game::kScreenHeight),
+    	Game::kWindowWidth,
+		Game::kWindowHeight,
     	SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     renderer = SDL_CreateRenderer(sdlWindow, -1, 0);

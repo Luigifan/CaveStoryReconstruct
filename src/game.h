@@ -8,6 +8,7 @@ struct Player;
 struct AnimatedSprite;
 struct Graphics;
 struct Map;
+struct FirstCaveBat;
 
 struct Game
 {
@@ -16,6 +17,8 @@ struct Game
   
   static units::Tile kScreenWidth;
   static units::Tile kScreenHeight;
+  static units::Pixel kWindowWidth;
+  static units::Pixel kWindowHeight;
   void runEventLoop();
 private:
   void eventLoop();
@@ -23,6 +26,7 @@ private:
   void draw(Graphics& graphics);
   std::shared_ptr<Player> player_;
   std::shared_ptr<Map> map_;
+  std::unique_ptr<FirstCaveBat> bat_;
 };
 
 #endif //GAME_H_

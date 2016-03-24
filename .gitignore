@@ -1,6 +1,8 @@
 # VS Shit
 [Dd]ebug
 [Rr]elease
+*.opendb
+.vs
 
 # Compiled Object files
 *.slo

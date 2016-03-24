@@ -7,6 +7,7 @@
 #include "player.h"
 #include "input.h"
 #include "map.h"
+#include "first_cave_bat.h"
 
 namespace {
   const units::FPS kTargetFramesPerSecond = 60;
@@ -15,6 +16,8 @@ namespace {
 
 units::Tile Game::kScreenWidth = 20 ; //640
 units::Tile Game::kScreenHeight = 15 ; //480
+units::Pixel Game::kWindowWidth = units::tileToPixel(kScreenWidth * 2);
+units::Pixel Game::kWindowHeight = units::tileToPixel(kScreenHeight * 2);
 
 Game::Game()
 {
@@ -35,6 +38,7 @@ void Game::runEventLoop()
 void Game::update(units::MS elapsed_time_ms)
 {
   player_->update(elapsed_time_ms, *map_); //dereference that bitch
+  bat_->update(elapsed_time_ms);
   map_->update(elapsed_time_ms);
 }
 
@@ -43,6 +47,7 @@ void Game::draw(Graphics& graphics)
   graphics.clear();
   map_->drawBackground(graphics);
   player_->draw(graphics);
+  bat_->draw(graphics);
   map_->draw(graphics);
   graphics.flip();
 }
@@ -57,8 +62,10 @@ void Game::eventLoop()
   bool running = true;
   SDL_Event event;
   Graphics graphics; //when this loop exits, this will be deconstructed
+  graphics.setWindowText("Cave Story");
   Input input;
   player_.reset(new Player(graphics, units::tileToGame(kScreenWidth / 2), units::tileToGame(kScreenHeight / 2)));
+  bat_.reset(new FirstCaveBat(graphics, units::tileToGame(5), units::tileToGame(kScreenHeight / 2)));
   map_.reset(Map::createTestMap(graphics));
 
   units::MS last_update_time = SDL_GetTicks();
@@ -143,7 +150,7 @@ void Game::eventLoop()
     const units::MS ms_per_frame = 1000 / kTargetFramesPerSecond;
     const units::MS elapsed_time_ms = SDL_GetTicks() - startTimeMs;
 
-    graphics.setWindowText("Cave Story - " + std::to_string(int(1.0f / (ms_per_frame - elapsed_time_ms) * 1000.0f)) + "fps");
+    //graphics.setWindowText("Cave Story - " + std::to_string(int(1.0f / (ms_per_frame - elapsed_time_ms) * 1000.0f)) + "fps");
     if(elapsed_time_ms < ms_per_frame)
     {
       SDL_Delay(ms_per_frame - elapsed_time_ms);
