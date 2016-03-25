@@ -33,22 +33,6 @@ namespace {
     const units::FPS kWalkFps = 15; //frames per second for the walk animation. lower values will make it slower
     const units::Frame kNumFramesWalk = 3; //the number of frames in the walking animation
 
-    //Hud
-    const units::Game kHealthBarX = units::tileToGame(1);
-    const units::Game kHealthBarY = units::tileToGame(2);
-    const units::Game kHealthFillX = 5 * units::kHalfTile;
-    const units::Game kHealthFillY = units::tileToGame(2);
-
-    const units::Game kHealthBarSourceX = 0;
-    const units::Game kHealthBarSourceY = 5 * units::kHalfTile;
-    const units::Tile kHealthBarSourceWidth = 4;
-    const units::Game kHealthBarSourceHeight = units::kHalfTile;
-
-    const units::Game kHealthFillSourceX = 0;
-    const units::Game kHealthFillSourceY = 3 * units::kHalfTile;
-    const units::Game kHealthBarFillHeight = units::kHalfTile;
-    //End HUD
-
     const std::string kSpriteFilePath = "content/MyChar.pbm";
 
     const Rectangle kCollisionX(6.0f,
@@ -107,7 +91,7 @@ bool operator<(const Player::SpriteState& a, const Player::SpriteState& b)
     return false;
 }
 
-Player::Player(Graphics& graphics, units::Game x, units::Game y)
+Player::Player(Graphics& graphics, units::Game x, units::Game y) : health_(graphics)
 {
     x_ = x;
     y_ = y;
@@ -137,24 +121,6 @@ Rectangle Player::getDamageRect() const
 
 void Player::initializeSprites(Graphics& graphics)
 {
-    health_bar_sprite_.reset(new Sprite(graphics, "content/TextBox.pbm",
-        units::gameToPixel(kHealthBarSourceX), units::gameToPixel(kHealthBarSourceY),
-        units::tileToPixel(kHealthBarSourceWidth),
-        units::gameToPixel(kHealthBarSourceHeight)
-    ));
-
-    health_fill_sprite_.reset(new Sprite(graphics, "content/TextBox.pbm",
-        units::gameToPixel(kHealthFillSourceX), units::gameToPixel(kHealthFillSourceY),
-        units::gameToPixel(5 * units::kHalfTile - 2),
-        units::gameToPixel(kHealthBarFillHeight)
-    ));
-
-    three_.reset(new Sprite(graphics, "content/TextBox.pbm",
-        units::gameToPixel(3 * units::kHalfTile), units::gameToPixel(7 * units::kHalfTile),
-        units::gameToPixel(units::kHalfTile), units::gameToPixel(units::kHalfTile)
-    ));
-
-
     // for every motion type
       // for every horizontal facing
         // for every vertical facing
@@ -255,6 +221,8 @@ void Player::update(units::MS elapsed_time_ms, const Map& map)
         invincible_time_ += elapsed_time_ms;
         invincible_ = invincible_time_ < kMaxInvincibleTime;
     }
+
+    health_.update(elapsed_time_ms);
 
     updateX(elapsed_time_ms, map);
     updateY(elapsed_time_ms, map);
@@ -429,14 +397,11 @@ void Player::draw(Graphics& graphics)
     }
 }
 
-void Player::drawHUD(Graphics& graphics) const
+void Player::drawHUD(Graphics& graphics)
 {
     if (spriteIsVisible())
     {
-        health_bar_sprite_->draw(graphics, kHealthBarX, kHealthBarY);
-        health_fill_sprite_->draw(graphics, kHealthFillX, kHealthFillY);
-
-        three_->draw(graphics, units::tileToGame(2), units::tileToGame(2));
+        health_.draw(graphics);
     }
 }
 
@@ -509,6 +474,7 @@ void Player::stopJump()
 void Player::takeDamage()
 {
     if (invincible_) return;
+    health_.takeDamage(2);
 
     //also, if we're already jumping we won't decrease our jump speed
     velocity_y_ = std::min(velocity_y_, -kShortJumpSpeed); //we can't repeatedly set this because we'll keep flying up

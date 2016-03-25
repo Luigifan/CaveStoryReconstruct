@@ -6,6 +6,8 @@
 #include "animated_sprite.h"
 #include "rectangle.h"
 #include "unit.h"
+#include "number_sprite.h"
+#include "variable_width_sprite.h"
 
 struct Graphics;
 struct Map;
@@ -18,7 +20,7 @@ struct Player
   void update(units::MS elapsed_time_ms, const Map& map);
   void draw(Graphics& graphics);
 
-  void drawHUD(Graphics& graphics) const;
+  void drawHUD(Graphics& graphics);
 
   void startMovingLeft();
   void startMovingRight();
@@ -68,6 +70,24 @@ private:
   };
   //friend because SpriteState is a private friend class of player
   friend bool operator<(const SpriteState& a, const SpriteState& b);
+
+  struct Health {
+      Health(Graphics& graphics);
+      void update(units::MS elapsed_time);
+      void draw(Graphics& graphics);
+      bool takeDamage(units::HP damage); //returns true if we died
+  private:
+      units::Game fillOffset(units::HP health) const;
+
+      units::MS damage_time_;
+      units::HP damage_;
+      units::HP max_health_;
+      units::HP current_health_;
+      Sprite health_bar_sprite_; //background for the health bar. always there.
+      VariableWidthSprite health_fill_sprite_;
+      VariableWidthSprite damage_fill_sprite_;
+  };
+
   void initializeSprites(Graphics& graphics);
   void initializeSprite(Graphics& graphics, const SpriteState& sprite);
 
@@ -92,6 +112,7 @@ private:
   bool jump_active_;
   bool interacting_;
 
+  Health health_;
   bool invincible_;
   units::MS invincible_time_;
 
@@ -99,13 +120,6 @@ private:
   VerticalFacing vertical_facing_;
 
   std::map<SpriteState, std::shared_ptr<Sprite>> sprites_;
-
-  ///Health
-  std::unique_ptr<Sprite> health_bar_sprite_; //background for the health bar. always there.
-  std::unique_ptr<Sprite> health_fill_sprite_;
-  std::unique_ptr<Sprite> three_;
-  ///
-
 };
 
 
